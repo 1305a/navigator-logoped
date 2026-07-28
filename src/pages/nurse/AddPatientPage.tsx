@@ -60,7 +60,7 @@ export default function AddPatientPage() {
       speechCard: null,
       programCreated: false,
       programSummary: "",
-      assignedExercises: [],
+      sessions: [],
     });
     toast.success("Пациент добавлен");
     navigate("/nurse/patients");

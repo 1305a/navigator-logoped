@@ -11,6 +11,7 @@ import PatientsListPage from "@/pages/logoped/PatientsListPage";
 import PatientDetailPage from "@/pages/logoped/PatientDetailPage";
 import LogopedProfilePage from "@/pages/logoped/ProfilePage";
 import LogopedExerciseSessionRoute from "@/pages/logoped/PatientExerciseSessionRoute";
+import LogopedSessionDetailRoute from "@/pages/logoped/PatientSessionDetailRoute";
 
 import PatientLayout from "@/layouts/PatientLayout";
 import PatientDashboardPage from "@/pages/patient/PatientDashboardPage";
@@ -18,6 +19,7 @@ import HomeworkPage from "@/pages/patient/HomeworkPage";
 import DiaryPage from "@/pages/patient/DiaryPage";
 import ProgramPage from "@/pages/patient/ProgramPage";
 import PatientExerciseSessionRoute from "@/pages/patient/PatientExerciseSessionRoute";
+import PatientSessionDetailRoute from "@/pages/patient/PatientSessionDetailRoute";
 
 import NurseLayout from "@/layouts/NurseLayout";
 import NurseProfilePage from "@/pages/nurse/NurseProfilePage";
@@ -50,7 +52,11 @@ export default function App() {
         <Route path="patients" element={<PatientsListPage />} />
         <Route path="patients/:patientId" element={<PatientDetailPage />} />
         <Route
-          path="patients/:patientId/exercise/:exerciseId"
+          path="patients/:patientId/session/:sessionId"
+          element={<LogopedSessionDetailRoute />}
+        />
+        <Route
+          path="patients/:patientId/session/:sessionId/exercise/:exerciseId"
           element={<LogopedExerciseSessionRoute />}
         />
         <Route path="profile" element={<LogopedProfilePage />} />
@@ -68,7 +74,11 @@ export default function App() {
         <Route path="homework" element={<HomeworkPage />} />
         <Route path="diary" element={<DiaryPage />} />
         <Route path="program" element={<ProgramPage />} />
-        <Route path="exercise/:exerciseId" element={<PatientExerciseSessionRoute />} />
+        <Route path="program/session/:sessionId" element={<PatientSessionDetailRoute />} />
+        <Route
+          path="program/session/:sessionId/exercise/:exerciseId"
+          element={<PatientExerciseSessionRoute />}
+        />
       </Route>
 
       <Route

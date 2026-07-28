@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAppState } from "@/context/AppStateContext";
 import type { PatientInfo } from "@/data/types";
 import { journalEntries, patientStatistics } from "@/data/misc";
+import { getSessionProgress } from "@/lib/therapy";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -121,6 +122,10 @@ export default function NursePatientDetailPage() {
                   <div>
                     <p className="mb-1 text-sm font-medium text-foreground">Программа коррекции</p>
                     <p className="text-sm text-muted-foreground">{patient.programSummary}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Прогресс: {getSessionProgress(patient.sessions).done} /{" "}
+                      {getSessionProgress(patient.sessions).total} занятий
+                    </p>
                   </div>
                 </>
               )}

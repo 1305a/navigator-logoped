@@ -39,9 +39,18 @@ export interface Exercise {
   duration: string;
 }
 
-export interface AssignedExercise {
+export interface SessionExercise {
   exerciseId: string;
   done: boolean;
+}
+
+export interface TherapySession {
+  id: string;
+  order: number;
+  title: string;
+  exercises: SessionExercise[];
+  grade: number | null;
+  completedDate: string | null;
 }
 
 export interface ExerciseReport {
@@ -73,7 +82,7 @@ export interface Patient {
   speechCard: SpeechCard | null;
   programCreated: boolean;
   programSummary: string;
-  assignedExercises: AssignedExercise[];
+  sessions: TherapySession[];
 }
 
 export interface Appointment {

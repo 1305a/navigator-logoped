@@ -28,9 +28,17 @@ function generateReport(): ExerciseReport {
   };
 }
 
-export default function ExerciseSessionPage({ backTo, patientId }: { backTo: string; patientId: string }) {
+export default function ExerciseSessionPage({
+  backTo,
+  patientId,
+  sessionId,
+}: {
+  backTo: string;
+  patientId: string;
+  sessionId: string;
+}) {
   const { exerciseId } = useParams<{ exerciseId: string }>();
-  const { setExerciseDone } = useAppState();
+  const { setSessionExerciseDone } = useAppState();
   const navigate = useNavigate();
 
   const [started, setStarted] = useState(false);
@@ -55,7 +63,7 @@ export default function ExerciseSessionPage({ backTo, patientId }: { backTo: str
   }
 
   function handleCloseReport() {
-    if (exerciseId) setExerciseDone(patientId, exerciseId, true);
+    if (exerciseId) setSessionExerciseDone(patientId, sessionId, exerciseId, true);
     setReport(null);
     navigate(backTo);
   }

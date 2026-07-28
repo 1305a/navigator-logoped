@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAppState } from "@/context/AppStateContext";
 import { getExerciseById } from "@/data/exercises";
+import { getCurrentSession } from "@/lib/therapy";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,8 @@ export default function PatientDashboardPage() {
     .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
   const nextAppointment = myAppointments[0];
   const upcoming = myAppointments.slice(0, 3);
-  const pendingExercises = patient.assignedExercises.filter((ae) => !ae.done);
+  const currentSession = getCurrentSession(patient.sessions);
+  const pendingExercises = currentSession?.exercises.filter((ae) => !ae.done) ?? [];
 
   return (
     <div className="flex flex-col gap-6">

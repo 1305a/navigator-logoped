@@ -1,4 +1,23 @@
-import type { Patient } from "./types";
+import type { Patient, TherapySession } from "./types";
+import { buildSessions } from "@/lib/therapy";
+
+function withProgress(
+  patientId: string,
+  pool: string[],
+  sessionCount: number,
+  grades: number[],
+): TherapySession[] {
+  const sessions = buildSessions(patientId, pool, sessionCount);
+  return sessions.map((s, i) => {
+    if (i >= grades.length) return s;
+    return {
+      ...s,
+      grade: grades[i],
+      completedDate: "28.07.2026",
+      exercises: s.exercises.map((ex) => ({ ...ex, done: true })),
+    };
+  });
+}
 
 export const initialPatients: Patient[] = [
   {
@@ -33,12 +52,7 @@ export const initialPatients: Patient[] = [
     programCreated: true,
     programSummary:
       "Индивидуальная программа коррекции моторной афазии. Периодичность — 3 раза в неделю по 30–40 минут. Основные направления: восстановление номинативной функции речи, стимуляция спонтанного высказывания, работа над темпом и плавностью речи.",
-    assignedExercises: [
-      { exerciseId: "ex-6", done: true },
-      { exerciseId: "ex-7", done: true },
-      { exerciseId: "ex-8", done: false },
-      { exerciseId: "ex-9", done: false },
-    ],
+    sessions: withProgress("p1", ["ex-6", "ex-7", "ex-8", "ex-9"], 5, [4, 5]),
   },
   {
     id: "p2",
@@ -72,11 +86,7 @@ export const initialPatients: Patient[] = [
     programCreated: true,
     programSummary:
       "Программа стимуляции речевого развития. Периодичность — 2 раза в неделю по 25 минут в игровой форме. Основные направления: расширение пассивного и активного словаря, формирование фразовой речи, развитие фонематического слуха.",
-    assignedExercises: [
-      { exerciseId: "ex-6", done: true },
-      { exerciseId: "ex-5", done: false },
-      { exerciseId: "ex-1", done: true },
-    ],
+    sessions: withProgress("p2", ["ex-6", "ex-5", "ex-1"], 6, [5, 4]),
   },
   {
     id: "p3",
@@ -110,10 +120,7 @@ export const initialPatients: Patient[] = [
     programCreated: true,
     programSummary:
       "Программа коррекции заикания. Периодичность — 2 раза в неделю по 30 минут. Основные направления: работа над темпом и плавностью речи, дыхательные упражнения, снижение речевой тревожности.",
-    assignedExercises: [
-      { exerciseId: "ex-2", done: true },
-      { exerciseId: "ex-7", done: false },
-    ],
+    sessions: withProgress("p3", ["ex-2", "ex-7"], 4, [3]),
   },
   {
     id: "p4",
@@ -147,11 +154,7 @@ export const initialPatients: Patient[] = [
     programCreated: true,
     programSummary:
       "Программа коррекции стёртой дизартрии. Периодичность — 3 раза в неделю по 30 минут. Основные направления: артикуляционная гимнастика, автоматизация звуков, развитие мелкой моторики.",
-    assignedExercises: [
-      { exerciseId: "ex-1", done: true },
-      { exerciseId: "ex-4", done: true },
-      { exerciseId: "ex-3", done: false },
-    ],
+    sessions: withProgress("p4", ["ex-1", "ex-4", "ex-3"], 5, [4, 4, 5]),
   },
   {
     id: "p5",
@@ -185,10 +188,7 @@ export const initialPatients: Patient[] = [
     programCreated: true,
     programSummary:
       "Программа восстановления при сенсомоторной афазии. Периодичность — 3 раза в неделю по 30 минут. Основные направления: развитие понимания речи, стимуляция называния предметов, работа с короткими диалогами.",
-    assignedExercises: [
-      { exerciseId: "ex-6", done: false },
-      { exerciseId: "ex-5", done: true },
-    ],
+    sessions: withProgress("p5", ["ex-6", "ex-5"], 4, [3]),
   },
   {
     id: "p6",
@@ -222,11 +222,7 @@ export const initialPatients: Patient[] = [
     programCreated: true,
     programSummary:
       "Программа коррекции ОНР III уровня. Периодичность — 3 раза в неделю по 30 минут. Основные направления: расширение словаря, формирование грамматического строя речи, развитие связной речи.",
-    assignedExercises: [
-      { exerciseId: "ex-10", done: true },
-      { exerciseId: "ex-9", done: true },
-      { exerciseId: "ex-6", done: true },
-    ],
+    sessions: withProgress("p6", ["ex-10", "ex-9", "ex-6"], 5, [5, 5, 4, 5, 5]),
   },
   {
     id: "p7",
@@ -249,6 +245,40 @@ export const initialPatients: Patient[] = [
     speechCard: null,
     programCreated: false,
     programSummary: "",
-    assignedExercises: [],
+    sessions: [],
+  },
+  {
+    id: "p8",
+    fullName: "Егорова Алина Викторовна",
+    tariff: "Премиум",
+    notes: "Дизартрия тяжёлой степени после ЧМТ, длительная реабилитация",
+    lastActivity: "27.07.2026",
+    avgRating: 4.7,
+    info: {
+      birthDate: "22.11.1978",
+      gender: "Женский",
+      address: "г. Москва, ул. Победы, д. 33, кв. 61",
+      phone: "+7 (916) 890-12-34",
+      contactPerson: "Егоров Сергей Николаевич (муж)",
+      insurance: "ДМС",
+      referral: "Направление невролога, выписка из реабилитационного центра",
+      admissionDate: "12.10.2025",
+      attendingDoctor: "Иванова А.С.",
+    },
+    speechCard: {
+      diagnosis: "Дизартрия тяжёлой степени после черепно-мозговой травмы",
+      durationOfDisorder: "около 10 месяцев",
+      fatigueLevel: "Средняя, стабилизировалась к текущему этапу терапии",
+      cognitiveStatus: "Сохранён, снижена скорость речевой реакции",
+      motivation: "Высокая, устойчиво занимается на протяжении всей программы",
+      expectations: "Адекватные, видит и ценит промежуточный прогресс",
+      formedRequest: "Разборчивая, уверенная речь в профессиональном общении",
+      familySupport: "Высокая, муж сопровождает на всех занятиях",
+      hobbies: "Иностранные языки, живопись",
+    },
+    programCreated: true,
+    programSummary:
+      "Долгосрочная программа коррекции тяжёлой дизартрии после ЧМТ. Периодичность — 3 раза в неделю по 40 минут. Основные направления: артикуляционная гимнастика, автоматизация звуков в связной речи, развитие темпо-ритмической организации речи, закрепление достигнутых результатов.",
+    sessions: withProgress("p8", ["ex-10", "ex-9", "ex-6", "ex-5"], 8, [4, 5, 4, 5, 5, 4]),
   },
 ];

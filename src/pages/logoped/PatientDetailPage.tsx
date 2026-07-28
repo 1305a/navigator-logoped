@@ -1,25 +1,16 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppState } from "@/context/AppStateContext";
-import { getExerciseById } from "@/data/exercises";
 import type { SpeechCard } from "@/data/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  ArrowLeft,
-  ClipboardCheck,
-  FileText,
-  Lock,
-  Play,
-  Sparkles,
-  User,
-} from "lucide-react";
+import { SessionRoadmap } from "@/components/app/SessionRoadmap";
+import { ArrowLeft, ClipboardCheck, FileText, Lock, Sparkles, User } from "lucide-react";
 
 const emptyCard: SpeechCard = {
   diagnosis: "",
@@ -33,13 +24,25 @@ const emptyCard: SpeechCard = {
   hobbies: "",
 };
 
-const defaultExerciseSet = ["ex-1", "ex-4", "ex-5", "ex-10"];
+const defaultExercisePool = [
+  "ex-1",
+  "ex-2",
+  "ex-3",
+  "ex-4",
+  "ex-5",
+  "ex-6",
+  "ex-7",
+  "ex-8",
+  "ex-9",
+  "ex-10",
+];
 
 export default function PatientDetailPage() {
   const { patientId } = useParams<{ patientId: string }>();
-  const { getPatient, saveSpeechCard, createProgram, setExerciseDone } = useAppState();
+  const { getPatient, saveSpeechCard, createProgram } = useAppState();
   const navigate = useNavigate();
-  const [tab, setTab] = useState("info");
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState(searchParams.get("tab") ?? "info");
   const patient = patientId ? getPatient(patientId) : undefined;
   const [form, setForm] = useState<SpeechCard>(patient?.speechCard ?? emptyCard);
 
@@ -60,7 +63,7 @@ export default function PatientDetailPage() {
     const summary = `Индивидуальная программа коррекции составлена на основании данных речевой карты. Диагноз: ${
       form.diagnosis || "уточняется"
     }. Периодичность — 2–3 раза в неделю по 25–30 минут. Основные направления: работа над звукопроизношением и фонематическим слухом, развитие лексико-грамматического строя речи, автоматизация поставленных навыков в самостоятельной речи.`;
-    createProgram(patient.id, summary, defaultExerciseSet);
+    createProgram(patient.id, summary, defaultExercisePool, 6);
     toast.success("Программа успешно составлена");
     setTab("program");
   }
@@ -96,9 +99,6 @@ export default function PatientDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="program" disabled={locked} className="gap-1.5">
             {locked && <Lock className="size-3.5" />} Программа
-          </TabsTrigger>
-          <TabsTrigger value="exercises" disabled={locked} className="gap-1.5">
-            {locked && <Lock className="size-3.5" />} Список упражнений
           </TabsTrigger>
         </TabsList>
 
@@ -220,81 +220,15 @@ export default function PatientDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Программа</CardTitle>
-              <CardDescription>Индивидуальная программа логопедической коррекции</CardDescription>
+              <CardDescription>Карта терапии — последовательность занятий</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
               <p className="text-sm leading-relaxed text-foreground">{patient.programSummary}</p>
               <Separator />
-              <div>
-                <p className="mb-2 text-sm font-medium text-foreground">
-                  Упражнения, которые необходимо выполнить
-                </p>
-                <div className="flex flex-col gap-1">
-                  {patient.assignedExercises.map((ae) => {
-                    const ex = getExerciseById(ae.exerciseId);
-                    if (!ex) return null;
-                    return (
-                      <button
-                        key={ae.exerciseId}
-                        onClick={() => setTab("exercises")}
-                        className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors hover:bg-muted/60"
-                      >
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{ex.title}</p>
-                          <p className="text-xs text-muted-foreground">{ex.category}</p>
-                        </div>
-                        <Badge variant={ae.done ? "secondary" : "outline"}>
-                          {ae.done ? "выполнено" : "не выполнено"}
-                        </Badge>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="exercises" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Список упражнений</CardTitle>
-              <CardDescription>Назначенные упражнения по текущей программе</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2">
-              {patient.assignedExercises.map((ae) => {
-                const ex = getExerciseById(ae.exerciseId);
-                if (!ex) return null;
-                return (
-                  <div
-                    key={ae.exerciseId}
-                    className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">{ex.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {ex.category} · {ex.duration}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                      <Badge variant={ae.done ? "secondary" : "outline"}>
-                        {ae.done ? "выполнено" : "не выполнено"}
-                      </Badge>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-1.5"
-                        onClick={() => {
-                          setExerciseDone(patient.id, ae.exerciseId, false);
-                          navigate(`/logoped/patients/${patient.id}/exercise/${ae.exerciseId}`);
-                        }}
-                      >
-                        <Play className="size-3.5" /> Начать занятие
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
+              <SessionRoadmap
+                sessions={patient.sessions}
+                onSelectSession={(s) => navigate(`/logoped/patients/${patient.id}/session/${s.id}`)}
+              />
             </CardContent>
           </Card>
         </TabsContent>

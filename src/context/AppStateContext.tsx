@@ -14,6 +14,7 @@ import { appointments as initialAppointments } from "@/data/appointments";
 import { initialDiaryEntries } from "@/data/diary";
 import { initialStaff } from "@/data/staff";
 import { fundingTypes } from "@/data/misc";
+import { buildSessions } from "@/lib/therapy";
 
 interface InstitutionSettings {
   name: string;
@@ -28,8 +29,19 @@ interface AppStateValue {
   patients: Patient[];
   getPatient: (id: string) => Patient | undefined;
   saveSpeechCard: (patientId: string, card: SpeechCard) => void;
-  createProgram: (patientId: string, summary: string, exerciseIds: string[]) => void;
-  setExerciseDone: (patientId: string, exerciseId: string, done: boolean) => void;
+  createProgram: (
+    patientId: string,
+    summary: string,
+    exerciseIds: string[],
+    sessionCount?: number,
+  ) => void;
+  setSessionExerciseDone: (
+    patientId: string,
+    sessionId: string,
+    exerciseId: string,
+    done: boolean,
+  ) => void;
+  gradeSession: (patientId: string, sessionId: string, grade: number) => void;
   addPatient: (patient: Patient) => void;
   updatePatientInfo: (patientId: string, info: PatientInfo) => void;
 
@@ -74,7 +86,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const createProgram = (patientId: string, summary: string, exerciseIds: string[]) => {
+  const createProgram = (
+    patientId: string,
+    summary: string,
+    exerciseIds: string[],
+    sessionCount = 6,
+  ) => {
     setPatients((prev) =>
       prev.map((p) =>
         p.id === patientId
@@ -82,24 +99,48 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
               ...p,
               programCreated: true,
               programSummary: summary,
-              assignedExercises: exerciseIds.map((exerciseId) => ({
-                exerciseId,
-                done: false,
-              })),
+              sessions: buildSessions(patientId, exerciseIds, sessionCount),
             }
           : p,
       ),
     );
   };
 
-  const setExerciseDone = (patientId: string, exerciseId: string, done: boolean) => {
+  const setSessionExerciseDone = (
+    patientId: string,
+    sessionId: string,
+    exerciseId: string,
+    done: boolean,
+  ) => {
     setPatients((prev) =>
       prev.map((p) =>
         p.id === patientId
           ? {
               ...p,
-              assignedExercises: p.assignedExercises.map((ae) =>
-                ae.exerciseId === exerciseId ? { ...ae, done } : ae,
+              sessions: p.sessions.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      exercises: s.exercises.map((ex) =>
+                        ex.exerciseId === exerciseId ? { ...ex, done } : ex,
+                      ),
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const gradeSession = (patientId: string, sessionId: string, grade: number) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              sessions: p.sessions.map((s) =>
+                s.id === sessionId ? { ...s, grade, completedDate: "28.07.2026" } : s,
               ),
             }
           : p,
@@ -131,7 +172,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       getPatient,
       saveSpeechCard,
       createProgram,
-      setExerciseDone,
+      setSessionExerciseDone,
+      gradeSession,
       addPatient,
       updatePatientInfo,
       appointments,
