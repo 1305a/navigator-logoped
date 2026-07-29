@@ -10,6 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SessionRoadmap } from "@/components/app/SessionRoadmap";
 import {
   ArrowLeft,
@@ -34,6 +41,16 @@ const emptyCard: SpeechCard = {
   hobbies: "",
 };
 
+const manualDiagnosisOptions = [
+  "Дислалия",
+  "Стёртая дизартрия",
+  "Заикание невротической формы",
+  "Задержка речевого развития (ЗРР)",
+  "Общее недоразвитие речи (ОНР) III уровня",
+  "Моторная афазия лёгкой степени",
+  "Сенсомоторная афазия средней степени",
+];
+
 const defaultExercisePool = [
   "ex-1",
   "ex-2",
@@ -56,6 +73,7 @@ export default function PatientDetailPage() {
   const [tab, setTab] = useState(searchParams.get("tab") ?? "info");
   const patient = patientId ? getPatient(patientId) : undefined;
   const [form, setForm] = useState<SpeechCard>(patient?.speechCard ?? emptyCard);
+  const [manualDiagnosis, setManualDiagnosis] = useState("");
 
   if (!patient) {
     return (
@@ -94,6 +112,16 @@ export default function PatientDetailPage() {
     if (!patient) return;
     rejectDiagnosis(patient.id);
     toast.error("Диагноз отклонён");
+  }
+
+  function handleManualDiagnosis() {
+    if (!patient || !manualDiagnosis) return;
+    suggestDiagnosis(patient.id, manualDiagnosis);
+    approveDiagnosis(patient.id);
+    const summary = `Индивидуальная программа коррекции составлена на основании диагноза, выбранного логопедом вручную: ${manualDiagnosis}. Периодичность — 2–3 раза в неделю по 25–30 минут. Основные направления: работа над звукопроизношением и фонематическим слухом, развитие лексико-грамматического строя речи, автоматизация поставленных навыков в самостоятельной речи.`;
+    createProgram(patient.id, summary, defaultExercisePool, 6);
+    toast.success("Программа составлена на основе выбранного диагноза");
+    setTab("program");
   }
 
   const diagnosisLocked = !patient.speechCard;
@@ -298,9 +326,39 @@ export default function PatientDetailPage() {
                 </div>
               )}
               {patient.diagnosisStatus === "rejected" && (
-                <p className="self-end text-sm text-muted-foreground">
-                  Диагноз отклонён. Требуется очное обследование для уточнения.
-                </p>
+                <div className="flex flex-col gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    Диагноз отклонён. Требуется очное обследование для уточнения.
+                  </p>
+                  <Separator />
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Выбрать диагноз вручную</Label>
+                    <Select
+                      value={manualDiagnosis}
+                      onValueChange={(v) => v && setManualDiagnosis(v)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Выберите диагноз" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {manualDiagnosisOptions.map((d) => (
+                          <SelectItem key={d} value={d}>
+                            {d}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={handleManualDiagnosis}
+                      disabled={!manualDiagnosis}
+                      className="gap-1.5"
+                    >
+                      <Sparkles className="size-4" /> Составить программу
+                    </Button>
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
