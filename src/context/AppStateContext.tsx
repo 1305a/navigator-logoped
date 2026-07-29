@@ -29,6 +29,9 @@ interface AppStateValue {
   patients: Patient[];
   getPatient: (id: string) => Patient | undefined;
   saveSpeechCard: (patientId: string, card: SpeechCard) => void;
+  suggestDiagnosis: (patientId: string, text: string) => void;
+  approveDiagnosis: (patientId: string) => void;
+  rejectDiagnosis: (patientId: string) => void;
   createProgram: (
     patientId: string,
     summary: string,
@@ -83,6 +86,28 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const saveSpeechCard = (patientId: string, card: SpeechCard) => {
     setPatients((prev) =>
       prev.map((p) => (p.id === patientId ? { ...p, speechCard: card } : p)),
+    );
+  };
+
+  const suggestDiagnosis = (patientId: string, text: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, suggestedDiagnosis: text, diagnosisStatus: "pending" }
+          : p,
+      ),
+    );
+  };
+
+  const approveDiagnosis = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) => (p.id === patientId ? { ...p, diagnosisStatus: "approved" } : p)),
+    );
+  };
+
+  const rejectDiagnosis = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) => (p.id === patientId ? { ...p, diagnosisStatus: "rejected" } : p)),
     );
   };
 
@@ -171,6 +196,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       patients,
       getPatient,
       saveSpeechCard,
+      suggestDiagnosis,
+      approveDiagnosis,
+      rejectDiagnosis,
       createProgram,
       setSessionExerciseDone,
       gradeSession,

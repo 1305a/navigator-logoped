@@ -58,6 +58,8 @@ export default function AddPatientPage() {
         attendingDoctor: "Иванова А.С.",
       },
       speechCard: null,
+      suggestedDiagnosis: null,
+      diagnosisStatus: "pending",
       programCreated: false,
       programSummary: "",
       sessions: [],

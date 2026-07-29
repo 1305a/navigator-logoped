@@ -71,6 +71,8 @@ export interface PatientInfo {
   attendingDoctor: string;
 }
 
+export type DiagnosisStatus = "pending" | "approved" | "rejected";
+
 export interface Patient {
   id: string;
   fullName: string;
@@ -80,6 +82,8 @@ export interface Patient {
   avgRating: number;
   info: PatientInfo;
   speechCard: SpeechCard | null;
+  suggestedDiagnosis: string | null;
+  diagnosisStatus: DiagnosisStatus;
   programCreated: boolean;
   programSummary: string;
   sessions: TherapySession[];

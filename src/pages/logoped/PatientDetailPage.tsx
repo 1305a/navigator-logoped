@@ -8,9 +8,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { SessionRoadmap } from "@/components/app/SessionRoadmap";
-import { ArrowLeft, ClipboardCheck, FileText, Lock, Sparkles, User } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ClipboardCheck,
+  FileText,
+  Lock,
+  Sparkles,
+  User,
+  XCircle,
+} from "lucide-react";
 
 const emptyCard: SpeechCard = {
   diagnosis: "",
@@ -39,7 +49,8 @@ const defaultExercisePool = [
 
 export default function PatientDetailPage() {
   const { patientId } = useParams<{ patientId: string }>();
-  const { getPatient, saveSpeechCard, createProgram } = useAppState();
+  const { getPatient, saveSpeechCard, suggestDiagnosis, approveDiagnosis, rejectDiagnosis, createProgram } =
+    useAppState();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(searchParams.get("tab") ?? "info");
@@ -57,18 +68,36 @@ export default function PatientDetailPage() {
     );
   }
 
-  function handleSaveCard() {
+  function handleSubmitCard() {
     if (!patient) return;
     saveSpeechCard(patient.id, form);
+    const diagnosisText = `На основании данных речевой карты предполагается диагноз: ${
+      form.diagnosis || "уточняется"
+    }.${form.fatigueLevel ? ` Дополнительно отмечается: ${form.fatigueLevel}.` : ""}`;
+    suggestDiagnosis(patient.id, diagnosisText);
+    toast.success("Диагноз предложен системой");
+    setTab("diagnosis");
+  }
+
+  function handleApproveDiagnosis() {
+    if (!patient) return;
+    approveDiagnosis(patient.id);
     const summary = `Индивидуальная программа коррекции составлена на основании данных речевой карты. Диагноз: ${
       form.diagnosis || "уточняется"
     }. Периодичность — 2–3 раза в неделю по 25–30 минут. Основные направления: работа над звукопроизношением и фонематическим слухом, развитие лексико-грамматического строя речи, автоматизация поставленных навыков в самостоятельной речи.`;
     createProgram(patient.id, summary, defaultExercisePool, 6);
-    toast.success("Программа успешно составлена");
+    toast.success("Диагноз одобрен, программа составлена");
     setTab("program");
   }
 
-  const locked = !patient.programCreated;
+  function handleRejectDiagnosis() {
+    if (!patient) return;
+    rejectDiagnosis(patient.id);
+    toast.error("Диагноз отклонён");
+  }
+
+  const diagnosisLocked = !patient.speechCard;
+  const programLocked = !patient.programCreated;
 
   return (
     <div className="flex flex-col gap-6">
@@ -97,8 +126,11 @@ export default function PatientDetailPage() {
           <TabsTrigger value="card" className="gap-1.5">
             <FileText className="size-3.5" /> Речевая карта
           </TabsTrigger>
-          <TabsTrigger value="program" disabled={locked} className="gap-1.5">
-            {locked && <Lock className="size-3.5" />} Программа
+          <TabsTrigger value="diagnosis" disabled={diagnosisLocked} className="gap-1.5">
+            {diagnosisLocked && <Lock className="size-3.5" />} Диагноз
+          </TabsTrigger>
+          <TabsTrigger value="program" disabled={programLocked} className="gap-1.5">
+            {programLocked && <Lock className="size-3.5" />} Программа
           </TabsTrigger>
         </TabsList>
 
@@ -128,8 +160,8 @@ export default function PatientDetailPage() {
               <CardTitle>Речевая карта</CardTitle>
               <CardDescription>
                 {patient.speechCard
-                  ? "Опросник заполнен. Данные использованы при составлении программы."
-                  : "Заполните опросник, чтобы составить индивидуальную программу"}
+                  ? "Опросник заполнен. Данные использованы для формирования диагноза."
+                  : "Заполните опросник, чтобы получить предполагаемый диагноз"}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
@@ -202,15 +234,73 @@ export default function PatientDetailPage() {
 
               {!patient.speechCard && (
                 <div className="flex justify-end">
-                  <Button onClick={handleSaveCard} className="gap-1.5">
-                    <Sparkles className="size-4" /> Составить программу
+                  <Button onClick={handleSubmitCard} className="gap-1.5">
+                    <Sparkles className="size-4" /> Получить диагноз
                   </Button>
                 </div>
               )}
-              {patient.speechCard && patient.programCreated && (
+              {patient.speechCard && (
                 <div className="flex items-center gap-1.5 self-end text-sm text-primary">
-                  <ClipboardCheck className="size-4" /> Программа уже составлена
+                  <ClipboardCheck className="size-4" />
+                  {patient.diagnosisStatus === "approved"
+                    ? "Диагноз одобрен, программа составлена"
+                    : patient.diagnosisStatus === "rejected"
+                      ? "Диагноз отклонён"
+                      : "Карта отправлена на анализ — перейдите во вкладку «Диагноз»"}
                 </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="diagnosis" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Диагноз</CardTitle>
+              <CardDescription>Предположение системы на основе речевой карты</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-5">
+              <div>
+                <Badge
+                  variant={
+                    patient.diagnosisStatus === "approved"
+                      ? "secondary"
+                      : patient.diagnosisStatus === "rejected"
+                        ? "destructive"
+                        : "outline"
+                  }
+                >
+                  {patient.diagnosisStatus === "approved"
+                    ? "Одобрен"
+                    : patient.diagnosisStatus === "rejected"
+                      ? "Отклонён"
+                      : "Ожидает решения"}
+                </Badge>
+              </div>
+              <p className="text-sm leading-relaxed text-foreground">
+                {patient.suggestedDiagnosis ?? "Диагноз ещё не сформирован."}
+              </p>
+              <Separator />
+
+              {patient.diagnosisStatus === "pending" && (
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={handleRejectDiagnosis} className="gap-1.5">
+                    <XCircle className="size-4" /> Отклонить
+                  </Button>
+                  <Button onClick={handleApproveDiagnosis} className="gap-1.5">
+                    <CheckCircle2 className="size-4" /> Одобрить
+                  </Button>
+                </div>
+              )}
+              {patient.diagnosisStatus === "approved" && (
+                <div className="flex items-center gap-1.5 self-end text-sm text-primary">
+                  <ClipboardCheck className="size-4" /> Диагноз одобрен, программа составлена
+                </div>
+              )}
+              {patient.diagnosisStatus === "rejected" && (
+                <p className="self-end text-sm text-muted-foreground">
+                  Диагноз отклонён. Требуется очное обследование для уточнения.
+                </p>
               )}
             </CardContent>
           </Card>
