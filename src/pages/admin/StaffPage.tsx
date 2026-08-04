@@ -85,7 +85,9 @@ export default function StaffPage() {
                 <Label>Роль</Label>
                 <Select value={role} onValueChange={(v) => v && setRole(v as Role)}>
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="Выберите роль">
+                      {(value: Role | null) => (value ? roleLabels[value] : "Выберите роль")}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {staffRoles.map((r) => (

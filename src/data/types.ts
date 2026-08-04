@@ -82,6 +82,8 @@ export interface Patient {
   avgRating: number;
   info: PatientInfo;
   speechCard: SpeechCard | null;
+  suggestedDisorderType: string | null;
+  disorderTypeStatus: DiagnosisStatus;
   suggestedDiagnosis: string | null;
   diagnosisStatus: DiagnosisStatus;
   programCreated: boolean;

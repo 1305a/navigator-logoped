@@ -117,7 +117,11 @@ export default function BookAppointmentPage() {
             <Label>Пациент</Label>
             <Select value={patientId} onValueChange={(v) => v && setPatientId(v)}>
               <SelectTrigger className="w-full">
-                <SelectValue />
+                <SelectValue placeholder="Выберите пациента">
+                  {(value: string | null) =>
+                    value ? patients.find((p) => p.id === value)?.fullName : "Выберите пациента"
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {patients.map((p) => (

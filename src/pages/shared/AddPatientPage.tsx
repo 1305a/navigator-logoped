@@ -58,6 +58,8 @@ export default function AddPatientPage({ backTo }: { backTo: string }) {
         attendingDoctor: "Иванова А.С.",
       },
       speechCard: null,
+      suggestedDisorderType: null,
+      disorderTypeStatus: "pending",
       suggestedDiagnosis: null,
       diagnosisStatus: "pending",
       programCreated: false,

@@ -29,6 +29,9 @@ interface AppStateValue {
   patients: Patient[];
   getPatient: (id: string) => Patient | undefined;
   saveSpeechCard: (patientId: string, card: SpeechCard) => void;
+  suggestDisorderType: (patientId: string, text: string) => void;
+  approveDisorderType: (patientId: string) => void;
+  rejectDisorderType: (patientId: string) => void;
   suggestDiagnosis: (patientId: string, text: string) => void;
   approveDiagnosis: (patientId: string) => void;
   rejectDiagnosis: (patientId: string) => void;
@@ -86,6 +89,28 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const saveSpeechCard = (patientId: string, card: SpeechCard) => {
     setPatients((prev) =>
       prev.map((p) => (p.id === patientId ? { ...p, speechCard: card } : p)),
+    );
+  };
+
+  const suggestDisorderType = (patientId: string, text: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, suggestedDisorderType: text, disorderTypeStatus: "pending" }
+          : p,
+      ),
+    );
+  };
+
+  const approveDisorderType = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) => (p.id === patientId ? { ...p, disorderTypeStatus: "approved" } : p)),
+    );
+  };
+
+  const rejectDisorderType = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) => (p.id === patientId ? { ...p, disorderTypeStatus: "rejected" } : p)),
     );
   };
 
@@ -196,6 +221,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       patients,
       getPatient,
       saveSpeechCard,
+      suggestDisorderType,
+      approveDisorderType,
+      rejectDisorderType,
       suggestDiagnosis,
       approveDiagnosis,
       rejectDiagnosis,

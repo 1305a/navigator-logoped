@@ -38,6 +38,8 @@ export const initialPatients: Patient[] = [
       admissionDate: "05.02.2026",
       attendingDoctor: "Иванова А.С.",
     },
+    suggestedDisorderType: "Моторная афазия",
+    disorderTypeStatus: "approved",
     speechCard: {
       diagnosis: "Моторная афазия лёгкой степени после ОНМК",
       durationOfDisorder: "5 месяцев",
@@ -75,6 +77,8 @@ export const initialPatients: Patient[] = [
       admissionDate: "10.01.2026",
       attendingDoctor: "Иванова А.С.",
     },
+    suggestedDisorderType: "Задержка речевого развития",
+    disorderTypeStatus: "approved",
     speechCard: {
       diagnosis: "Задержка речевого развития (ЗРР)",
       durationOfDisorder: "около 1,5 лет",
@@ -112,6 +116,8 @@ export const initialPatients: Patient[] = [
       admissionDate: "20.02.2026",
       attendingDoctor: "Иванова А.С.",
     },
+    suggestedDisorderType: "Заикание",
+    disorderTypeStatus: "approved",
     speechCard: {
       diagnosis: "Невротическая форма заикания",
       durationOfDisorder: "2 года",
@@ -149,6 +155,8 @@ export const initialPatients: Patient[] = [
       admissionDate: "15.03.2026",
       attendingDoctor: "Иванова А.С.",
     },
+    suggestedDisorderType: "Дизартрия",
+    disorderTypeStatus: "approved",
     speechCard: {
       diagnosis: "Стёртая дизартрия",
       durationOfDisorder: "около 3 лет",
@@ -186,6 +194,8 @@ export const initialPatients: Patient[] = [
       admissionDate: "18.01.2026",
       attendingDoctor: "Иванова А.С.",
     },
+    suggestedDisorderType: "Сенсомоторная афазия",
+    disorderTypeStatus: "approved",
     speechCard: {
       diagnosis: "Сенсомоторная афазия средней степени после ОНМК",
       durationOfDisorder: "8 месяцев",
@@ -223,6 +233,8 @@ export const initialPatients: Patient[] = [
       admissionDate: "01.02.2026",
       attendingDoctor: "Иванова А.С.",
     },
+    suggestedDisorderType: "Общее недоразвитие речи (ОНР)",
+    disorderTypeStatus: "approved",
     speechCard: {
       diagnosis: "ОНР III уровня",
       durationOfDisorder: "около 2 лет",
@@ -260,6 +272,8 @@ export const initialPatients: Patient[] = [
       admissionDate: "22.07.2026",
       attendingDoctor: "Иванова А.С.",
     },
+    suggestedDisorderType: null,
+    disorderTypeStatus: "pending",
     speechCard: null,
     suggestedDiagnosis: null,
     diagnosisStatus: "pending",
@@ -285,6 +299,8 @@ export const initialPatients: Patient[] = [
       admissionDate: "12.10.2025",
       attendingDoctor: "Иванова А.С.",
     },
+    suggestedDisorderType: "Дизартрия тяжёлой степени",
+    disorderTypeStatus: "approved",
     speechCard: {
       diagnosis: "Дизартрия тяжёлой степени после черепно-мозговой травмы",
       durationOfDisorder: "около 10 месяцев",
