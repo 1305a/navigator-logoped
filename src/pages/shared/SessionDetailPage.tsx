@@ -2,14 +2,21 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppState } from "@/context/AppStateContext";
-import { getExerciseById } from "@/data/exercises";
+import { exerciseBank, getExerciseById } from "@/data/exercises";
 import { getSessionStatus } from "@/lib/therapy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { GradeStars } from "@/components/app/GradeStars";
-import { ArrowLeft, Lock, Play } from "lucide-react";
+import { ArrowLeft, Lock, Play, Plus, Trash2 } from "lucide-react";
 
 export default function SessionDetailPage({
   patientId,
@@ -21,9 +28,16 @@ export default function SessionDetailPage({
   allowGrading: boolean;
 }) {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const { getPatient, setSessionExerciseDone, gradeSession } = useAppState();
+  const {
+    getPatient,
+    setSessionExerciseDone,
+    addSessionExercise,
+    removeSessionExercise,
+    gradeSession,
+  } = useAppState();
   const navigate = useNavigate();
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+  const [exerciseToAdd, setExerciseToAdd] = useState("");
 
   const patient = getPatient(patientId);
   const session = patient?.sessions.find((s) => s.id === sessionId);
@@ -62,14 +76,31 @@ export default function SessionDetailPage({
     );
   }
 
-  const allDone = session.exercises.every((ex) => ex.done);
+  const allDone = session.exercises.length > 0 && session.exercises.every((ex) => ex.done);
   const completed = status === "completed";
+  const canEditExercises = allowGrading && !completed;
+  const availableToAdd = exerciseBank.filter(
+    (e) => !session.exercises.some((se) => se.exerciseId === e.id),
+  );
 
   function handleComplete() {
     if (!sessionId || !selectedGrade) return;
     gradeSession(patientId, sessionId, selectedGrade);
     toast.success("Занятие завершено");
     goBack();
+  }
+
+  function handleAddExercise() {
+    if (!sessionId || !exerciseToAdd) return;
+    addSessionExercise(patientId, sessionId, exerciseToAdd);
+    toast.success("Упражнение добавлено в занятие");
+    setExerciseToAdd("");
+  }
+
+  function handleRemoveExercise(exerciseId: string) {
+    if (!sessionId) return;
+    removeSessionExercise(patientId, sessionId, exerciseId);
+    toast.success("Упражнение удалено из занятия");
   }
 
   return (
@@ -92,6 +123,11 @@ export default function SessionDetailPage({
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
+          {session.exercises.length === 0 && (
+            <p className="rounded-lg border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">
+              Упражнения не добавлены
+            </p>
+          )}
           {session.exercises.map((ex) => {
             const exercise = getExerciseById(ex.exerciseId);
             if (!exercise) return null;
@@ -123,10 +159,58 @@ export default function SessionDetailPage({
                       <Play className="size-3.5" /> Начать занятие
                     </Button>
                   )}
+                  {canEditExercises && (
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      onClick={() => handleRemoveExercise(ex.exerciseId)}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  )}
                 </div>
               </div>
             );
           })}
+
+          {canEditExercises && (
+            <div className="flex flex-col gap-1.5 pt-1 sm:flex-row sm:items-end sm:gap-2">
+              <div className="flex flex-1 flex-col gap-1.5">
+                <Select value={exerciseToAdd} onValueChange={(v) => v && setExerciseToAdd(v)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Добавить упражнение из банка">
+                      {(value: string | null) =>
+                        value
+                          ? exerciseBank.find((e) => e.id === value)?.title
+                          : "Добавить упражнение из банка"
+                      }
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableToAdd.length === 0 ? (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        Все упражнения банка уже добавлены
+                      </div>
+                    ) : (
+                      availableToAdd.map((e) => (
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.title}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                variant="outline"
+                className="gap-1.5"
+                disabled={!exerciseToAdd}
+                onClick={handleAddExercise}
+              >
+                <Plus className="size-3.5" /> Добавить
+              </Button>
+            </div>
+          )}
 
           <Separator className="my-2" />
 

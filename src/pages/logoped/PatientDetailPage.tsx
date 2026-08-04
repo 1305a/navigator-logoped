@@ -6,7 +6,14 @@ import type { PatientInfo, SpeechCard } from "@/data/types";
 import { preliminaryQuestions } from "@/data/preliminaryQuestions";
 import { speechCardTypes } from "@/data/speechCardTypes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,7 +35,7 @@ import {
   ClipboardCheck,
   ListChecks,
   Lock,
-  ShieldAlert,
+  RefreshCw,
   Sparkles,
   User,
   XCircle,
@@ -121,6 +128,7 @@ export default function PatientDetailPage() {
   );
   const [selectedCardTypeId, setSelectedCardTypeId] = useState("");
   const [cardTypeAnswers, setCardTypeAnswers] = useState<Record<string, boolean | string>>({});
+  const [editingDisorderType, setEditingDisorderType] = useState(false);
 
   if (!patient || !info) {
     return (
@@ -157,12 +165,18 @@ export default function PatientDetailPage() {
   function handleApproveDiagnosis() {
     if (!patient) return;
     approveDiagnosis(patient.id);
+    toast.success("Диагноз одобрен");
+    setTab("riskFactors");
+  }
+
+  function handleCreateProgram() {
+    if (!patient) return;
+    const alreadyCreated = patient.programCreated;
     const summary = `Индивидуальная программа коррекции составлена на основании диагноза: ${
       patient.suggestedDiagnosis ?? patient.suggestedDisorderType ?? "уточняется"
     } Периодичность — 2–3 раза в неделю по 25–30 минут. Основные направления: работа над звукопроизношением и фонематическим слухом, развитие лексико-грамматического строя речи, автоматизация поставленных навыков в самостоятельной речи.`;
     createProgram(patient.id, summary, defaultExercisePool, 6);
-    toast.success("Диагноз одобрен, программа составлена");
-    setTab("program");
+    toast.success(alreadyCreated ? "Программа обновлена" : "Программа составлена");
   }
 
   function handleSaveRiskFactors() {
@@ -193,6 +207,7 @@ export default function PatientDetailPage() {
     if (!patient) return;
     suggestDisorderType(patient.id, value);
     approveDisorderType(patient.id);
+    setEditingDisorderType(false);
     toast.success("Тип расстройства выбран вручную");
   }
 
@@ -224,16 +239,15 @@ export default function PatientDetailPage() {
     if (!patient || !manualDiagnosis) return;
     suggestDiagnosis(patient.id, manualDiagnosis);
     approveDiagnosis(patient.id);
-    const summary = `Индивидуальная программа коррекции составлена на основании диагноза, выбранного логопедом вручную: ${manualDiagnosis}. Периодичность — 2–3 раза в неделю по 25–30 минут. Основные направления: работа над звукопроизношением и фонематическим слухом, развитие лексико-грамматического строя речи, автоматизация поставленных навыков в самостоятельной речи.`;
-    createProgram(patient.id, summary, defaultExercisePool, 6);
-    toast.success("Программа составлена на основе выбранного диагноза");
-    setTab("program");
+    toast.success("Диагноз выбран вручную и одобрен");
+    setTab("riskFactors");
   }
 
   const selectedCardType = speechCardTypes.find((t) => t.id === selectedCardTypeId);
   const cardLocked = patient.disorderTypeStatus !== "approved";
   const diagnosisLocked = !patient.suggestedDiagnosis;
-  const programLocked = !patient.programCreated;
+  const riskFactorsLocked = patient.diagnosisStatus !== "approved";
+  const programLocked = patient.diagnosisStatus !== "approved";
 
   return (
     <div className="flex flex-col gap-6">
@@ -268,8 +282,8 @@ export default function PatientDetailPage() {
           <TabsTrigger value="diagnosis" disabled={diagnosisLocked} className="gap-1.5">
             {diagnosisLocked && <Lock className="size-3.5" />} Диагноз
           </TabsTrigger>
-          <TabsTrigger value="riskFactors" className="gap-1.5">
-            <ShieldAlert className="size-3.5" /> Факторы риска
+          <TabsTrigger value="riskFactors" disabled={riskFactorsLocked} className="gap-1.5">
+            {riskFactorsLocked && <Lock className="size-3.5" />} Факторы риска
           </TabsTrigger>
           <TabsTrigger value="program" disabled={programLocked} className="gap-1.5">
             {programLocked && <Lock className="size-3.5" />} Программа
@@ -384,14 +398,42 @@ export default function PatientDetailPage() {
               )}
 
               {patient.disorderTypeStatus === "approved" && patient.suggestedDisorderType && (
-                <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
-                  <div>
-                    <p className="mb-1 text-xs text-muted-foreground">Тип расстройства</p>
-                    <p className="text-sm font-medium text-foreground">
-                      {patient.suggestedDisorderType}
-                    </p>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
+                    <div>
+                      <p className="mb-1 text-xs text-muted-foreground">Тип расстройства</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {patient.suggestedDisorderType}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">Подтверждён</Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingDisorderType((v) => !v)}
+                      >
+                        Изменить
+                      </Button>
+                    </div>
                   </div>
-                  <Badge variant="secondary">Подтверждён</Badge>
+                  {editingDisorderType && (
+                    <div className="flex flex-col gap-1.5">
+                      <Label>Выбрать другой тип расстройства</Label>
+                      <Select value="" onValueChange={(v) => v && handleManualDisorderType(v)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Выберите тип расстройства" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {manualDisorderTypeOptions.map((d) => (
+                            <SelectItem key={d} value={d}>
+                              {d}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -523,7 +565,7 @@ export default function PatientDetailPage() {
                 <div className="flex items-center gap-1.5 self-end text-sm text-primary">
                   <ClipboardCheck className="size-4" />
                   {patient.diagnosisStatus === "approved"
-                    ? "Диагноз одобрен, программа составлена"
+                    ? "Диагноз одобрен — перейдите во вкладку «Факторы риска»"
                     : patient.diagnosisStatus === "rejected"
                       ? "Диагноз отклонён"
                       : "Карта отправлена на анализ — перейдите во вкладку «Диагноз»"}
@@ -574,7 +616,8 @@ export default function PatientDetailPage() {
               )}
               {patient.diagnosisStatus === "approved" && (
                 <div className="flex items-center gap-1.5 self-end text-sm text-primary">
-                  <ClipboardCheck className="size-4" /> Диагноз одобрен, программа составлена
+                  <ClipboardCheck className="size-4" /> Диагноз одобрен — перейдите во вкладку
+                  «Факторы риска»
                 </div>
               )}
               {patient.diagnosisStatus === "rejected" && (
@@ -607,7 +650,7 @@ export default function PatientDetailPage() {
                       disabled={!manualDiagnosis}
                       className="gap-1.5"
                     >
-                      <Sparkles className="size-4" /> Составить программу
+                      <CheckCircle2 className="size-4" /> Одобрить выбранный диагноз
                     </Button>
                   </div>
                 </div>
@@ -695,15 +738,49 @@ export default function PatientDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Программа</CardTitle>
-              <CardDescription>Карта терапии — последовательность занятий</CardDescription>
+              <CardDescription>
+                {patient.programCreated
+                  ? "Карта терапии — последовательность занятий"
+                  : "Диагноз одобрен — составьте программу коррекции"}
+              </CardDescription>
+              {patient.programCreated && (
+                <CardAction>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCreateProgram}
+                    className="gap-1.5"
+                  >
+                    <RefreshCw className="size-3.5" /> Обновить программу
+                  </Button>
+                </CardAction>
+              )}
             </CardHeader>
             <CardContent className="flex flex-col gap-5">
-              <p className="text-sm leading-relaxed text-foreground">{patient.programSummary}</p>
-              <Separator />
-              <SessionRoadmap
-                sessions={patient.sessions}
-                onSelectSession={(s) => navigate(`/logoped/patients/${patient.id}/session/${s.id}`)}
-              />
+              {!patient.programCreated ? (
+                <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed bg-muted/30 p-6">
+                  <p className="text-sm text-muted-foreground">
+                    Диагноз одобрен. Нажмите «Составить программу», чтобы сформировать карту
+                    терапии для пациента.
+                  </p>
+                  <Button onClick={handleCreateProgram} className="gap-1.5">
+                    <Sparkles className="size-4" /> Составить программу
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-sm leading-relaxed text-foreground">
+                    {patient.programSummary}
+                  </p>
+                  <Separator />
+                  <SessionRoadmap
+                    sessions={patient.sessions}
+                    onSelectSession={(s) =>
+                      navigate(`/logoped/patients/${patient.id}/session/${s.id}`)
+                    }
+                  />
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

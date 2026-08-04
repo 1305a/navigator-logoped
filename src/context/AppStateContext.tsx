@@ -47,6 +47,8 @@ interface AppStateValue {
     exerciseId: string,
     done: boolean,
   ) => void;
+  addSessionExercise: (patientId: string, sessionId: string, exerciseId: string) => void;
+  removeSessionExercise: (patientId: string, sessionId: string, exerciseId: string) => void;
   gradeSession: (patientId: string, sessionId: string, grade: number) => void;
   addPatient: (patient: Patient) => void;
   updatePatientInfo: (patientId: string, info: PatientInfo) => void;
@@ -183,6 +185,40 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const addSessionExercise = (patientId: string, sessionId: string, exerciseId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              sessions: p.sessions.map((s) =>
+                s.id === sessionId && !s.exercises.some((ex) => ex.exerciseId === exerciseId)
+                  ? { ...s, exercises: [...s.exercises, { exerciseId, done: false }] }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const removeSessionExercise = (patientId: string, sessionId: string, exerciseId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              sessions: p.sessions.map((s) =>
+                s.id === sessionId
+                  ? { ...s, exercises: s.exercises.filter((ex) => ex.exerciseId !== exerciseId) }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
   const gradeSession = (patientId: string, sessionId: string, grade: number) => {
     setPatients((prev) =>
       prev.map((p) =>
@@ -229,6 +265,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       rejectDiagnosis,
       createProgram,
       setSessionExerciseDone,
+      addSessionExercise,
+      removeSessionExercise,
       gradeSession,
       addPatient,
       updatePatientInfo,
