@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, UserPlus } from "lucide-react";
 
-export default function AddPatientPage() {
+export default function AddPatientPage({ backTo }: { backTo: string }) {
   const { addPatient } = useAppState();
   const navigate = useNavigate();
 
@@ -65,7 +65,7 @@ export default function AddPatientPage() {
       sessions: [],
     });
     toast.success("Пациент добавлен");
-    navigate("/nurse/patients");
+    navigate(backTo);
   }
 
   return (
@@ -75,7 +75,7 @@ export default function AddPatientPage() {
           variant="ghost"
           size="sm"
           className="-ml-2 mb-1 gap-1.5"
-          render={<Link to="/nurse/patients" />}
+          render={<Link to={backTo} />}
         >
           <ArrowLeft className="size-4" /> Пациенты
         </Button>

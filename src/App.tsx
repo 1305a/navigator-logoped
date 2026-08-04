@@ -12,6 +12,7 @@ import PatientDetailPage from "@/pages/logoped/PatientDetailPage";
 import LogopedProfilePage from "@/pages/logoped/ProfilePage";
 import LogopedExerciseSessionRoute from "@/pages/logoped/PatientExerciseSessionRoute";
 import LogopedSessionDetailRoute from "@/pages/logoped/PatientSessionDetailRoute";
+import LogopedAddPatientRoute from "@/pages/logoped/AddPatientRoute";
 
 import PatientLayout from "@/layouts/PatientLayout";
 import PatientDashboardPage from "@/pages/patient/PatientDashboardPage";
@@ -25,7 +26,7 @@ import NurseLayout from "@/layouts/NurseLayout";
 import NurseProfilePage from "@/pages/nurse/NurseProfilePage";
 import NursePatientsListPage from "@/pages/nurse/NursePatientsListPage";
 import NursePatientDetailPage from "@/pages/nurse/NursePatientDetailPage";
-import AddPatientPage from "@/pages/nurse/AddPatientPage";
+import NurseAddPatientRoute from "@/pages/nurse/AddPatientRoute";
 import BookAppointmentPage from "@/pages/nurse/BookAppointmentPage";
 import DocumentsPage from "@/pages/nurse/DocumentsPage";
 
@@ -59,6 +60,7 @@ export default function App() {
           path="patients/:patientId/session/:sessionId/exercise/:exerciseId"
           element={<LogopedExerciseSessionRoute />}
         />
+        <Route path="add-patient" element={<LogopedAddPatientRoute />} />
         <Route path="profile" element={<LogopedProfilePage />} />
       </Route>
 
@@ -93,7 +95,7 @@ export default function App() {
         <Route path="profile" element={<NurseProfilePage />} />
         <Route path="patients" element={<NursePatientsListPage />} />
         <Route path="patients/:patientId" element={<NursePatientDetailPage />} />
-        <Route path="add-patient" element={<AddPatientPage />} />
+        <Route path="add-patient" element={<NurseAddPatientRoute />} />
         <Route path="book-appointment" element={<BookAppointmentPage />} />
         <Route path="documents" element={<DocumentsPage />} />
       </Route>

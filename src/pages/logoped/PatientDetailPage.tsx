@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppState } from "@/context/AppStateContext";
-import type { SpeechCard } from "@/data/types";
+import type { PatientInfo, SpeechCard } from "@/data/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -66,16 +67,24 @@ const defaultExercisePool = [
 
 export default function PatientDetailPage() {
   const { patientId } = useParams<{ patientId: string }>();
-  const { getPatient, saveSpeechCard, suggestDiagnosis, approveDiagnosis, rejectDiagnosis, createProgram } =
-    useAppState();
+  const {
+    getPatient,
+    saveSpeechCard,
+    suggestDiagnosis,
+    approveDiagnosis,
+    rejectDiagnosis,
+    createProgram,
+    updatePatientInfo,
+  } = useAppState();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(searchParams.get("tab") ?? "info");
   const patient = patientId ? getPatient(patientId) : undefined;
   const [form, setForm] = useState<SpeechCard>(patient?.speechCard ?? emptyCard);
   const [manualDiagnosis, setManualDiagnosis] = useState("");
+  const [info, setInfo] = useState<PatientInfo | undefined>(patient?.info);
 
-  if (!patient) {
+  if (!patient || !info) {
     return (
       <div>
         <p className="text-sm text-muted-foreground">Пациент не найден.</p>
@@ -106,6 +115,24 @@ export default function PatientDetailPage() {
     createProgram(patient.id, summary, defaultExercisePool, 6);
     toast.success("Диагноз одобрен, программа составлена");
     setTab("program");
+  }
+
+  function handleSaveInfo() {
+    if (!patient || !info) return;
+    updatePatientInfo(patient.id, info);
+    toast.success("Данные пациента сохранены");
+  }
+
+  function infoField(key: keyof PatientInfo, label: string) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <Label className="text-xs font-normal text-muted-foreground">{label}</Label>
+        <Input
+          value={info![key]}
+          onChange={(e) => setInfo({ ...info!, [key]: e.target.value })}
+        />
+      </div>
+    );
   }
 
   function handleRejectDiagnosis() {
@@ -166,18 +193,25 @@ export default function PatientDetailPage() {
           <Card>
             <CardHeader>
               <CardTitle>Информация о пациенте</CardTitle>
-              <CardDescription>Данные, заполненные медсестрой при регистрации</CardDescription>
+              <CardDescription>
+                Данные пациента — при необходимости отредактируйте и сохраните
+              </CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2">
-              <InfoRow label="Дата рождения" value={patient.info.birthDate} />
-              <InfoRow label="Пол" value={patient.info.gender} />
-              <InfoRow label="Адрес" value={patient.info.address} />
-              <InfoRow label="Телефон" value={patient.info.phone} />
-              <InfoRow label="Контактное лицо" value={patient.info.contactPerson} />
-              <InfoRow label="Тип финансирования" value={patient.info.insurance} />
-              <InfoRow label="Направление" value={patient.info.referral} />
-              <InfoRow label="Дата начала лечения" value={patient.info.admissionDate} />
-              <InfoRow label="Лечащий врач" value={patient.info.attendingDoctor} />
+            <CardContent className="flex flex-col gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                {infoField("birthDate", "Дата рождения")}
+                {infoField("gender", "Пол")}
+                {infoField("address", "Адрес")}
+                {infoField("phone", "Телефон")}
+                {infoField("contactPerson", "Контактное лицо")}
+                {infoField("insurance", "Тип финансирования")}
+                {infoField("referral", "Направление")}
+                {infoField("admissionDate", "Дата начала лечения")}
+                {infoField("attendingDoctor", "Лечащий врач")}
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={handleSaveInfo}>Сохранить</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -381,15 +415,6 @@ export default function PatientDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-sm font-medium text-foreground">{value}</p>
     </div>
   );
 }

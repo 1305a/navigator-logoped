@@ -12,16 +12,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Star } from "lucide-react";
+import { Star, UserPlus } from "lucide-react";
 
 export default function PatientsListPage() {
   const { patients } = useAppState();
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Мои пациенты</h1>
-        <p className="text-sm text-muted-foreground">Список пациентов, закреплённых за вами</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Мои пациенты</h1>
+          <p className="text-sm text-muted-foreground">Список пациентов, закреплённых за вами</p>
+        </div>
+        <Button className="gap-1.5" render={<Link to="/logoped/add-patient" />}>
+          <UserPlus className="size-4" /> Добавить пациента
+        </Button>
       </div>
 
       <div className="overflow-hidden rounded-lg border bg-card">
