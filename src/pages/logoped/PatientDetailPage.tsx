@@ -114,6 +114,9 @@ export default function PatientDetailPage() {
     approveDiagnosis,
     rejectDiagnosis,
     createProgram,
+    addTherapySession,
+    removeTherapySession,
+    moveTherapySession,
     updatePatientInfo,
   } = useAppState();
   const navigate = useNavigate();
@@ -777,6 +780,18 @@ export default function PatientDetailPage() {
                     sessions={patient.sessions}
                     onSelectSession={(s) =>
                       navigate(`/logoped/patients/${patient.id}/session/${s.id}`)
+                    }
+                    editable
+                    onAddSession={() => {
+                      addTherapySession(patient.id);
+                      toast.success("Занятие добавлено");
+                    }}
+                    onRemoveSession={(sessionId) => {
+                      removeTherapySession(patient.id, sessionId);
+                      toast.success("Занятие удалено");
+                    }}
+                    onMoveSession={(sessionId, direction) =>
+                      moveTherapySession(patient.id, sessionId, direction)
                     }
                   />
                 </>

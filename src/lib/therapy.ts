@@ -24,6 +24,10 @@ export function buildSessions(
   });
 }
 
+export function renumberSessions(sessions: TherapySession[]): TherapySession[] {
+  return sessions.map((s, i) => ({ ...s, order: i + 1, title: `Занятие ${i + 1}` }));
+}
+
 export function getSessionStatus(
   session: TherapySession,
   sessions: TherapySession[],

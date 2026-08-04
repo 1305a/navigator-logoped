@@ -14,7 +14,7 @@ import { appointments as initialAppointments } from "@/data/appointments";
 import { initialDiaryEntries } from "@/data/diary";
 import { initialStaff } from "@/data/staff";
 import { fundingTypes } from "@/data/misc";
-import { buildSessions } from "@/lib/therapy";
+import { buildSessions, renumberSessions } from "@/lib/therapy";
 
 interface InstitutionSettings {
   name: string;
@@ -50,6 +50,9 @@ interface AppStateValue {
   addSessionExercise: (patientId: string, sessionId: string, exerciseId: string) => void;
   removeSessionExercise: (patientId: string, sessionId: string, exerciseId: string) => void;
   gradeSession: (patientId: string, sessionId: string, grade: number) => void;
+  addTherapySession: (patientId: string) => void;
+  removeTherapySession: (patientId: string, sessionId: string) => void;
+  moveTherapySession: (patientId: string, sessionId: string, direction: "up" | "down") => void;
   addPatient: (patient: Patient) => void;
   updatePatientInfo: (patientId: string, info: PatientInfo) => void;
 
@@ -234,6 +237,52 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const addTherapySession = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) => {
+        if (p.id !== patientId) return p;
+        const newSession = {
+          id: `${patientId}-s${Date.now()}`,
+          order: p.sessions.length + 1,
+          title: `Занятие ${p.sessions.length + 1}`,
+          exercises: [],
+          grade: null,
+          completedDate: null,
+        };
+        return { ...p, sessions: renumberSessions([...p.sessions, newSession]) };
+      }),
+    );
+  };
+
+  const removeTherapySession = (patientId: string, sessionId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, sessions: renumberSessions(p.sessions.filter((s) => s.id !== sessionId)) }
+          : p,
+      ),
+    );
+  };
+
+  const moveTherapySession = (
+    patientId: string,
+    sessionId: string,
+    direction: "up" | "down",
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) => {
+        if (p.id !== patientId) return p;
+        const index = p.sessions.findIndex((s) => s.id === sessionId);
+        if (index === -1) return p;
+        const targetIndex = direction === "up" ? index - 1 : index + 1;
+        if (targetIndex < 0 || targetIndex >= p.sessions.length) return p;
+        const next = [...p.sessions];
+        [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+        return { ...p, sessions: renumberSessions(next) };
+      }),
+    );
+  };
+
   const addPatient = (patient: Patient) => setPatients((prev) => [...prev, patient]);
 
   const updatePatientInfo = (patientId: string, info: PatientInfo) => {
@@ -268,6 +317,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       addSessionExercise,
       removeSessionExercise,
       gradeSession,
+      addTherapySession,
+      removeTherapySession,
+      moveTherapySession,
       addPatient,
       updatePatientInfo,
       appointments,
