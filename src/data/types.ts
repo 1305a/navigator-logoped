@@ -115,4 +115,5 @@ export interface StaffMember {
   fullName: string;
   position: string;
   role: Role;
+  active: boolean;
 }

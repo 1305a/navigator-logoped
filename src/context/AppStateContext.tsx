@@ -64,6 +64,7 @@ interface AppStateValue {
 
   staff: StaffMember[];
   addStaffMember: (member: StaffMember) => void;
+  updateStaffMember: (staffId: string, updates: Omit<StaffMember, "id">) => void;
 
   institution: InstitutionSettings;
   updateInstitution: (settings: InstitutionSettings) => void;
@@ -296,6 +297,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const addStaffMember = (member: StaffMember) => setStaff((prev) => [...prev, member]);
 
+  const updateStaffMember = (staffId: string, updates: Omit<StaffMember, "id">) => {
+    setStaff((prev) => prev.map((s) => (s.id === staffId ? { ...s, ...updates } : s)));
+  };
+
   const updateInstitution = (settings: InstitutionSettings) => setInstitution(settings);
 
   const value = useMemo<AppStateValue>(
@@ -328,6 +333,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       addDiaryEntry,
       staff,
       addStaffMember,
+      updateStaffMember,
       institution,
       updateInstitution,
     }),
