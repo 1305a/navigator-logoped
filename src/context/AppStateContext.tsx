@@ -6,16 +6,23 @@ import type {
   Patient,
   PatientInfo,
   Position,
+  Room,
   SpeechCard,
   StaffMember,
+  TherapySession,
 } from "@/data/types";
 import { initialPatients } from "@/data/patients";
 import { appointments as initialAppointments } from "@/data/appointments";
 import { initialDiaryEntries } from "@/data/diary";
 import { initialStaff } from "@/data/staff";
 import { initialPositions } from "@/data/positions";
+import { initialRooms } from "@/data/rooms";
 import { fundingTypes } from "@/data/misc";
 import { buildSessions, renumberSessions } from "@/lib/therapy";
+
+type SessionScheduleDetails =
+  | { location: "home" }
+  | { location: "room"; roomId: string; date: string; startTime: string; endTime: string };
 
 interface InstitutionSettings {
   name: string;
@@ -51,7 +58,12 @@ interface AppStateValue {
   addSessionExercise: (patientId: string, sessionId: string, exerciseId: string) => void;
   removeSessionExercise: (patientId: string, sessionId: string, exerciseId: string) => void;
   gradeSession: (patientId: string, sessionId: string, grade: number) => void;
-  addTherapySession: (patientId: string) => void;
+  addTherapySession: (patientId: string, details: SessionScheduleDetails) => void;
+  updateSessionSchedule: (
+    patientId: string,
+    sessionId: string,
+    details: SessionScheduleDetails,
+  ) => void;
   removeTherapySession: (patientId: string, sessionId: string) => void;
   moveTherapySession: (patientId: string, sessionId: string, direction: "up" | "down") => void;
   addPatient: (patient: Patient) => void;
@@ -72,6 +84,11 @@ interface AppStateValue {
   updatePosition: (positionId: string, title: string) => void;
   removePosition: (positionId: string) => void;
 
+  rooms: Room[];
+  addRoom: (room: Room) => void;
+  updateRoom: (roomId: string, name: string) => void;
+  removeRoom: (roomId: string) => void;
+
   institution: InstitutionSettings;
   updateInstitution: (settings: InstitutionSettings) => void;
 }
@@ -85,6 +102,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>(initialDiaryEntries);
   const [staff, setStaff] = useState<StaffMember[]>(initialStaff);
   const [positions, setPositions] = useState<Position[]>(initialPositions);
+  const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [institution, setInstitution] = useState<InstitutionSettings>({
     name: "Центр логопедической реабилитации «Навигатор»",
     funding: fundingTypes.filter((f) => f.id === "oms" || f.id === "paid").map((f) => f.id),
@@ -242,24 +260,132 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const addTherapySession = (patientId: string) => {
+  const addTherapySession = (patientId: string, details: SessionScheduleDetails) => {
+    const patient = patients.find((p) => p.id === patientId);
+    if (!patient) return;
+    const order = patient.sessions.length + 1;
+    const title = `Занятие ${order}`;
+    const bookingId = details.location === "room" ? `rb-${Date.now()}` : null;
+
+    const newSession: TherapySession = {
+      id: `${patientId}-s${Date.now()}`,
+      order,
+      title,
+      exercises: [],
+      grade: null,
+      completedDate: null,
+      location: details.location,
+      roomId: details.location === "room" ? details.roomId : null,
+      scheduledDate: details.location === "room" ? details.date : null,
+      startTime: details.location === "room" ? details.startTime : null,
+      endTime: details.location === "room" ? details.endTime : null,
+      bookingId,
+    };
+
     setPatients((prev) =>
-      prev.map((p) => {
-        if (p.id !== patientId) return p;
-        const newSession = {
-          id: `${patientId}-s${Date.now()}`,
-          order: p.sessions.length + 1,
-          title: `Занятие ${p.sessions.length + 1}`,
-          exercises: [],
-          grade: null,
-          completedDate: null,
-        };
-        return { ...p, sessions: renumberSessions([...p.sessions, newSession]) };
-      }),
+      prev.map((p) =>
+        p.id === patientId ? { ...p, sessions: renumberSessions([...p.sessions, newSession]) } : p,
+      ),
     );
+
+    if (details.location === "room" && bookingId) {
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === details.roomId
+            ? {
+                ...r,
+                bookings: [
+                  ...r.bookings,
+                  {
+                    id: bookingId,
+                    date: details.date,
+                    startTime: details.startTime,
+                    endTime: details.endTime,
+                    doctorName: currentUser?.fullName ?? "",
+                    patientName: patient.fullName,
+                    sessionTitle: title,
+                  },
+                ],
+              }
+            : r,
+        ),
+      );
+    }
+  };
+
+  const updateSessionSchedule = (
+    patientId: string,
+    sessionId: string,
+    details: SessionScheduleDetails,
+  ) => {
+    const patient = patients.find((p) => p.id === patientId);
+    const session = patient?.sessions.find((s) => s.id === sessionId);
+    if (!patient || !session) return;
+
+    if (session.roomId && session.bookingId) {
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === session.roomId
+            ? { ...r, bookings: r.bookings.filter((b) => b.id !== session.bookingId) }
+            : r,
+        ),
+      );
+    }
+
+    const bookingId = details.location === "room" ? `rb-${Date.now()}` : null;
+
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              sessions: p.sessions.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      location: details.location,
+                      roomId: details.location === "room" ? details.roomId : null,
+                      scheduledDate: details.location === "room" ? details.date : null,
+                      startTime: details.location === "room" ? details.startTime : null,
+                      endTime: details.location === "room" ? details.endTime : null,
+                      bookingId,
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+
+    if (details.location === "room" && bookingId) {
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === details.roomId
+            ? {
+                ...r,
+                bookings: [
+                  ...r.bookings,
+                  {
+                    id: bookingId,
+                    date: details.date,
+                    startTime: details.startTime,
+                    endTime: details.endTime,
+                    doctorName: currentUser?.fullName ?? "",
+                    patientName: patient.fullName,
+                    sessionTitle: session.title,
+                  },
+                ],
+              }
+            : r,
+        ),
+      );
+    }
   };
 
   const removeTherapySession = (patientId: string, sessionId: string) => {
+    const patient = patients.find((p) => p.id === patientId);
+    const session = patient?.sessions.find((s) => s.id === sessionId);
+
     setPatients((prev) =>
       prev.map((p) =>
         p.id === patientId
@@ -267,6 +393,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
           : p,
       ),
     );
+
+    if (session?.roomId && session.bookingId) {
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === session.roomId
+            ? { ...r, bookings: r.bookings.filter((b) => b.id !== session.bookingId) }
+            : r,
+        ),
+      );
+    }
   };
 
   const moveTherapySession = (
@@ -315,6 +451,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setPositions((prev) => prev.filter((p) => p.id !== positionId));
   };
 
+  const addRoom = (room: Room) => setRooms((prev) => [...prev, room]);
+
+  const updateRoom = (roomId: string, name: string) => {
+    setRooms((prev) => prev.map((r) => (r.id === roomId ? { ...r, name } : r)));
+  };
+
+  const removeRoom = (roomId: string) => {
+    setRooms((prev) => prev.filter((r) => r.id !== roomId));
+  };
+
   const updateInstitution = (settings: InstitutionSettings) => setInstitution(settings);
 
   const value = useMemo<AppStateValue>(
@@ -337,6 +483,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       removeSessionExercise,
       gradeSession,
       addTherapySession,
+      updateSessionSchedule,
       removeTherapySession,
       moveTherapySession,
       addPatient,
@@ -352,10 +499,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       addPosition,
       updatePosition,
       removePosition,
+      rooms,
+      addRoom,
+      updateRoom,
+      removeRoom,
       institution,
       updateInstitution,
     }),
-    [currentUser, patients, appointments, diaryEntries, staff, positions, institution],
+    [currentUser, patients, appointments, diaryEntries, staff, positions, rooms, institution],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

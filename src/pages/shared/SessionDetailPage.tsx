@@ -15,8 +15,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
 import { GradeStars } from "@/components/app/GradeStars";
+import { generateTimeOptions, rangesOverlap, timeToMinutes } from "@/lib/schedule";
 import { ArrowLeft, Lock, Play, Plus, Trash2 } from "lucide-react";
+
+function formatRuDate(date: Date) {
+  return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function parseRuDate(date: string): Date {
+  const [d, m, y] = date.split(".").map(Number);
+  return new Date(y, m - 1, d);
+}
 
 export default function SessionDetailPage({
   patientId,
@@ -34,6 +47,8 @@ export default function SessionDetailPage({
     addSessionExercise,
     removeSessionExercise,
     gradeSession,
+    updateSessionSchedule,
+    rooms,
   } = useAppState();
   const navigate = useNavigate();
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
@@ -41,6 +56,19 @@ export default function SessionDetailPage({
 
   const patient = getPatient(patientId);
   const session = patient?.sessions.find((s) => s.id === sessionId);
+
+  const [scheduleLocation, setScheduleLocation] = useState<"home" | "room">(
+    session?.location === "room" ? "room" : "home",
+  );
+  const [scheduleRoomId, setScheduleRoomId] = useState(session?.roomId ?? "");
+  const [scheduleDate, setScheduleDate] = useState<Date | undefined>(
+    session?.scheduledDate ? parseRuDate(session.scheduledDate) : undefined,
+  );
+  const [scheduleStartTime, setScheduleStartTime] = useState<string | null>(
+    session?.startTime ?? null,
+  );
+  const [scheduleEndTime, setScheduleEndTime] = useState<string | null>(session?.endTime ?? null);
+  const timeOptions = generateTimeOptions();
 
   function goBack() {
     navigate(allowGrading ? `${backTo}?tab=program` : backTo);
@@ -103,6 +131,47 @@ export default function SessionDetailPage({
     toast.success("Упражнение удалено из занятия");
   }
 
+  function handleSaveSchedule() {
+    if (!sessionId || !session) return;
+
+    if (scheduleLocation === "home") {
+      updateSessionSchedule(patientId, sessionId, { location: "home" });
+      toast.success("Место проведения обновлено");
+      return;
+    }
+
+    if (!scheduleRoomId || !scheduleDate || !scheduleStartTime || !scheduleEndTime) {
+      toast.error("Заполните кабинет, дату и время");
+      return;
+    }
+    if (timeToMinutes(scheduleEndTime) <= timeToMinutes(scheduleStartTime)) {
+      toast.error("Время окончания должно быть позже времени начала");
+      return;
+    }
+
+    const dateStr = formatRuDate(scheduleDate);
+    const room = rooms.find((r) => r.id === scheduleRoomId);
+    const hasConflict = room?.bookings.some(
+      (b) =>
+        b.id !== session.bookingId &&
+        b.date === dateStr &&
+        rangesOverlap(b.startTime, b.endTime, scheduleStartTime, scheduleEndTime),
+    );
+    if (hasConflict) {
+      toast.error("Кабинет уже занят в это время");
+      return;
+    }
+
+    updateSessionSchedule(patientId, sessionId, {
+      location: "room",
+      roomId: scheduleRoomId,
+      date: dateStr,
+      startTime: scheduleStartTime,
+      endTime: scheduleEndTime,
+    });
+    toast.success("Место проведения обновлено");
+  }
+
   return (
     <div className="mx-auto max-w-2xl">
       <Button variant="ghost" size="sm" className="mb-4 gap-1.5" onClick={goBack}>
@@ -123,6 +192,133 @@ export default function SessionDetailPage({
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3 rounded-lg border px-3 py-3">
+            <p className="text-sm font-medium text-foreground">Место проведения</p>
+            {canEditExercises ? (
+              <div className="flex flex-col gap-4">
+                <RadioGroup
+                  value={scheduleLocation}
+                  onValueChange={(v) => v && setScheduleLocation(v as "home" | "room")}
+                >
+                  <label className="flex items-center gap-2.5 text-sm text-foreground">
+                    <RadioGroupItem value="home" /> Дома
+                  </label>
+                  <label className="flex items-center gap-2.5 text-sm text-foreground">
+                    <RadioGroupItem value="room" /> В кабинете
+                  </label>
+                </RadioGroup>
+
+                {scheduleLocation === "room" && (
+                  <>
+                    <div className="flex flex-col gap-1.5">
+                      <Label>Кабинет</Label>
+                      <Select
+                        value={scheduleRoomId}
+                        onValueChange={(v) => v && setScheduleRoomId(v)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Выберите кабинет">
+                            {(v: string | null) =>
+                              rooms.find((r) => r.id === v)?.name ?? "Выберите кабинет"
+                            }
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rooms.map((r) => (
+                            <SelectItem key={r.id} value={r.id}>
+                              {r.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <Label>Дата</Label>
+                      <Calendar
+                        mode="single"
+                        selected={scheduleDate}
+                        onSelect={setScheduleDate}
+                        defaultMonth={scheduleDate}
+                        className="self-center rounded-lg border"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <Label>Время с</Label>
+                        <Select
+                          value={scheduleStartTime ?? ""}
+                          onValueChange={(v) => {
+                            if (!v) return;
+                            setScheduleStartTime(v);
+                            if (
+                              scheduleEndTime &&
+                              timeToMinutes(scheduleEndTime) <= timeToMinutes(v)
+                            ) {
+                              setScheduleEndTime(null);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="—" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeOptions.map((t) => (
+                              <SelectItem key={t} value={t}>
+                                {t}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <Label>Время по</Label>
+                        <Select
+                          value={scheduleEndTime ?? ""}
+                          onValueChange={(v) => v && setScheduleEndTime(v)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="—" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeOptions
+                              .filter(
+                                (t) =>
+                                  !scheduleStartTime ||
+                                  timeToMinutes(t) > timeToMinutes(scheduleStartTime),
+                              )
+                              .map((t) => (
+                                <SelectItem key={t} value={t}>
+                                  {t}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex justify-end">
+                  <Button size="sm" onClick={handleSaveSchedule}>
+                    Сохранить место и время
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {session.location === "room"
+                  ? `Кабинет: ${rooms.find((r) => r.id === session.roomId)?.name ?? "—"}, ${session.scheduledDate} ${session.startTime}–${session.endTime}`
+                  : session.location === "home"
+                    ? "Дома"
+                    : "Не указано"}
+              </p>
+            )}
+          </div>
+
+          <Separator className="my-2" />
+
           {session.exercises.length === 0 && (
             <p className="rounded-lg border border-dashed px-3 py-4 text-center text-sm text-muted-foreground">
               Упражнения не добавлены

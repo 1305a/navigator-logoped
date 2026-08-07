@@ -51,6 +51,28 @@ export interface TherapySession {
   exercises: SessionExercise[];
   grade: number | null;
   completedDate: string | null;
+  location: "home" | "room" | null;
+  roomId: string | null;
+  scheduledDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  bookingId: string | null;
+}
+
+export interface RoomBooking {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  doctorName: string;
+  patientName: string;
+  sessionTitle: string;
+}
+
+export interface Room {
+  id: string;
+  name: string;
+  bookings: RoomBooking[];
 }
 
 export interface ExerciseReport {

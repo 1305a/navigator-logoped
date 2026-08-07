@@ -1,4 +1,4 @@
-import type { TherapySession } from "@/data/types";
+import type { Room, TherapySession } from "@/data/types";
 import { getSessionProgress, getSessionStatus } from "@/lib/therapy";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ export function SessionRoadmap({
   onAddSession,
   onRemoveSession,
   onMoveSession,
+  rooms = [],
 }: {
   sessions: TherapySession[];
   onSelectSession: (session: TherapySession) => void;
@@ -20,6 +21,7 @@ export function SessionRoadmap({
   onAddSession?: () => void;
   onRemoveSession?: (sessionId: string) => void;
   onMoveSession?: (sessionId: string, direction: "up" | "down") => void;
+  rooms?: Room[];
 }) {
   const { done, total, fraction } = getSessionProgress(sessions);
 
@@ -100,6 +102,15 @@ export function SessionRoadmap({
                     {locked ? " · заблокировано" : ""}
                     {status === "available" ? " · доступно" : ""}
                   </p>
+                  {session.location === "home" && (
+                    <p className="text-xs text-muted-foreground">Дома</p>
+                  )}
+                  {session.location === "room" && (
+                    <p className="text-xs text-muted-foreground">
+                      Кабинет: {rooms.find((r) => r.id === session.roomId)?.name ?? "—"},{" "}
+                      {session.scheduledDate} {session.startTime}–{session.endTime}
+                    </p>
+                  )}
                 </div>
 
                 {completed && session.grade !== null && (

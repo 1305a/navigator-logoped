@@ -34,6 +34,7 @@ import AdminLayout from "@/layouts/AdminLayout";
 import GeneralPage from "@/pages/admin/GeneralPage";
 import StaffPage from "@/pages/admin/StaffPage";
 import PositionsPage from "@/pages/admin/PositionsPage";
+import RoomsPage from "@/pages/admin/RoomsPage";
 
 export default function App() {
   return (
@@ -113,6 +114,7 @@ export default function App() {
         <Route path="general" element={<GeneralPage />} />
         <Route path="staff" element={<StaffPage />} />
         <Route path="positions" element={<PositionsPage />} />
+        <Route path="rooms" element={<RoomsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

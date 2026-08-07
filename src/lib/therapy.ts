@@ -20,6 +20,12 @@ export function buildSessions(
       exercises: exerciseIds.map((exerciseId) => ({ exerciseId, done: false })),
       grade: null,
       completedDate: null,
+      location: null,
+      roomId: null,
+      scheduledDate: null,
+      startTime: null,
+      endTime: null,
+      bookingId: null,
     };
   });
 }

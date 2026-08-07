@@ -28,13 +28,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Calendar } from "@/components/ui/calendar";
 import { SessionRoadmap } from "@/components/app/SessionRoadmap";
+import { generateTimeOptions, rangesOverlap, timeToMinutes } from "@/lib/schedule";
 import {
   ArrowLeft,
   CheckCircle2,
   ClipboardCheck,
   ListChecks,
   Lock,
+  Plus,
   RefreshCw,
   Sparkles,
   User,
@@ -89,6 +101,10 @@ const manualDiagnosisOptions = [
   "Сенсомоторная афазия средней степени",
 ];
 
+function formatRuDate(date: Date) {
+  return date.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 const defaultExercisePool = [
   "ex-1",
   "ex-2",
@@ -118,6 +134,7 @@ export default function PatientDetailPage() {
     removeTherapySession,
     moveTherapySession,
     updatePatientInfo,
+    rooms,
   } = useAppState();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -132,6 +149,13 @@ export default function PatientDetailPage() {
   const [selectedCardTypeId, setSelectedCardTypeId] = useState("");
   const [cardTypeAnswers, setCardTypeAnswers] = useState<Record<string, boolean | string>>({});
   const [editingDisorderType, setEditingDisorderType] = useState(false);
+  const [addSessionOpen, setAddSessionOpen] = useState(false);
+  const [sessionLocation, setSessionLocation] = useState<"home" | "room">("home");
+  const [sessionRoomId, setSessionRoomId] = useState("");
+  const [sessionDate, setSessionDate] = useState<Date | undefined>(undefined);
+  const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
+  const [sessionEndTime, setSessionEndTime] = useState<string | null>(null);
+  const timeOptions = generateTimeOptions();
 
   if (!patient || !info) {
     return (
@@ -180,6 +204,58 @@ export default function PatientDetailPage() {
     } Периодичность — 2–3 раза в неделю по 25–30 минут. Основные направления: работа над звукопроизношением и фонематическим слухом, развитие лексико-грамматического строя речи, автоматизация поставленных навыков в самостоятельной речи.`;
     createProgram(patient.id, summary, defaultExercisePool, 6);
     toast.success(alreadyCreated ? "Программа обновлена" : "Программа составлена");
+  }
+
+  function resetAddSessionForm() {
+    setSessionLocation("home");
+    setSessionRoomId("");
+    setSessionDate(undefined);
+    setSessionStartTime(null);
+    setSessionEndTime(null);
+  }
+
+  function handleConfirmAddSession() {
+    if (!patient) return;
+
+    if (sessionLocation === "home") {
+      addTherapySession(patient.id, { location: "home" });
+      toast.success("Занятие добавлено");
+      setAddSessionOpen(false);
+      resetAddSessionForm();
+      return;
+    }
+
+    if (!sessionRoomId || !sessionDate || !sessionStartTime || !sessionEndTime) {
+      toast.error("Заполните кабинет, дату и время");
+      return;
+    }
+    if (timeToMinutes(sessionEndTime) <= timeToMinutes(sessionStartTime)) {
+      toast.error("Время окончания должно быть позже времени начала");
+      return;
+    }
+
+    const dateStr = formatRuDate(sessionDate);
+    const room = rooms.find((r) => r.id === sessionRoomId);
+    const hasConflict = room?.bookings.some(
+      (b) =>
+        b.date === dateStr &&
+        rangesOverlap(b.startTime, b.endTime, sessionStartTime, sessionEndTime),
+    );
+    if (hasConflict) {
+      toast.error("Кабинет уже занят в это время");
+      return;
+    }
+
+    addTherapySession(patient.id, {
+      location: "room",
+      roomId: sessionRoomId,
+      date: dateStr,
+      startTime: sessionStartTime,
+      endTime: sessionEndTime,
+    });
+    toast.success("Занятие добавлено");
+    setAddSessionOpen(false);
+    resetAddSessionForm();
   }
 
   function handleSaveRiskFactors() {
@@ -778,14 +854,12 @@ export default function PatientDetailPage() {
                   <Separator />
                   <SessionRoadmap
                     sessions={patient.sessions}
+                    rooms={rooms}
                     onSelectSession={(s) =>
                       navigate(`/logoped/patients/${patient.id}/session/${s.id}`)
                     }
                     editable
-                    onAddSession={() => {
-                      addTherapySession(patient.id);
-                      toast.success("Занятие добавлено");
-                    }}
+                    onAddSession={() => setAddSessionOpen(true)}
                     onRemoveSession={(sessionId) => {
                       removeTherapySession(patient.id, sessionId);
                       toast.success("Занятие удалено");
@@ -800,6 +874,127 @@ export default function PatientDetailPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog
+        open={addSessionOpen}
+        onOpenChange={(open) => {
+          setAddSessionOpen(open);
+          if (!open) resetAddSessionForm();
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Добавить занятие</DialogTitle>
+            <DialogDescription>Укажите место проведения занятия</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label>Место проведения</Label>
+              <RadioGroup
+                value={sessionLocation}
+                onValueChange={(v) => v && setSessionLocation(v as "home" | "room")}
+              >
+                <label className="flex items-center gap-2.5 text-sm text-foreground">
+                  <RadioGroupItem value="home" /> Дома
+                </label>
+                <label className="flex items-center gap-2.5 text-sm text-foreground">
+                  <RadioGroupItem value="room" /> В кабинете
+                </label>
+              </RadioGroup>
+            </div>
+
+            {sessionLocation === "room" && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <Label>Кабинет</Label>
+                  <Select value={sessionRoomId} onValueChange={(v) => v && setSessionRoomId(v)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Выберите кабинет">
+                        {(v: string | null) =>
+                          rooms.find((r) => r.id === v)?.name ?? "Выберите кабинет"
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rooms.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <Label>Дата</Label>
+                  <Calendar
+                    mode="single"
+                    selected={sessionDate}
+                    onSelect={setSessionDate}
+                    defaultMonth={sessionDate}
+                    className="self-center rounded-lg border"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Время с</Label>
+                    <Select
+                      value={sessionStartTime ?? ""}
+                      onValueChange={(v) => {
+                        if (!v) return;
+                        setSessionStartTime(v);
+                        if (sessionEndTime && timeToMinutes(sessionEndTime) <= timeToMinutes(v)) {
+                          setSessionEndTime(null);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="—" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timeOptions.map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Время по</Label>
+                    <Select
+                      value={sessionEndTime ?? ""}
+                      onValueChange={(v) => v && setSessionEndTime(v)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="—" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timeOptions
+                          .filter(
+                            (t) =>
+                              !sessionStartTime || timeToMinutes(t) > timeToMinutes(sessionStartTime),
+                          )
+                          .map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleConfirmAddSession} className="gap-1.5">
+              <Plus className="size-4" /> Добавить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
