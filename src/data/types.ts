@@ -121,6 +121,9 @@ export interface Appointment {
   time: string;
   type: string;
   doctorName?: string;
+  roomId: string | null;
+  roomStartTime: string | null;
+  roomEndTime: string | null;
 }
 
 export interface DiaryEntry {

@@ -441,8 +441,36 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setPatients((prev) => prev.map((p) => (p.id === patientId ? { ...p, info } : p)));
   };
 
-  const addAppointment = (appointment: Appointment) =>
+  const addAppointment = (appointment: Appointment) => {
     setAppointments((prev) => [...prev, appointment]);
+
+    if (appointment.roomId && appointment.roomStartTime && appointment.roomEndTime) {
+      const roomId = appointment.roomId;
+      const startTime = appointment.roomStartTime;
+      const endTime = appointment.roomEndTime;
+      setRooms((prev) =>
+        prev.map((r) =>
+          r.id === roomId
+            ? {
+                ...r,
+                bookings: [
+                  ...r.bookings,
+                  {
+                    id: `rb-${Date.now()}`,
+                    date: appointment.date,
+                    startTime,
+                    endTime,
+                    doctorName: appointment.doctorName ?? "",
+                    patientName: appointment.patientName,
+                    sessionTitle: appointment.type,
+                  },
+                ],
+              }
+            : r,
+        ),
+      );
+    }
+  };
 
   const addDiaryEntry = (entry: DiaryEntry) => setDiaryEntries((prev) => [entry, ...prev]);
 

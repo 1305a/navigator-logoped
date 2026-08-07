@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppState } from "@/context/AppStateContext";
+import { generateTimeOptions, rangesOverlap, timeToMinutes } from "@/lib/schedule";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -30,18 +31,23 @@ function formatRuDateLong(date: Date) {
 }
 
 export default function BookAppointmentPage() {
-  const { patients, staff, appointments, addAppointment } = useAppState();
+  const { patients, staff, appointments, addAppointment, rooms } = useAppState();
 
   const doctors = staff.filter((s) => s.role === "logoped");
+  const timeOptions = generateTimeOptions();
 
   const [patientId, setPatientId] = useState<string>(patients[0]?.id ?? "");
   const [doctorName, setDoctorName] = useState<string>(doctors[0]?.fullName ?? "");
   const [date, setDate] = useState<Date | undefined>(new Date(2026, 6, 27));
   const [time, setTime] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState("");
+  const [roomStartTime, setRoomStartTime] = useState<string | null>(null);
+  const [roomEndTime, setRoomEndTime] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   const patient = patients.find((p) => p.id === patientId);
   const dateStr = date ? formatRuDate(date) : "";
+  const selectedRoom = rooms.find((r) => r.id === roomId);
 
   const slots = useMemo(() => {
     if (!date) return [];
@@ -58,6 +64,23 @@ export default function BookAppointmentPage() {
       toast.error("Заполните пациента, врача, дату и время приёма");
       return;
     }
+    if (!roomId || !roomStartTime || !roomEndTime) {
+      toast.error("Заполните кабинет и период его занятости");
+      return;
+    }
+    if (timeToMinutes(roomEndTime) <= timeToMinutes(roomStartTime)) {
+      toast.error("Время окончания должно быть позже времени начала");
+      return;
+    }
+    const hasConflict = selectedRoom?.bookings.some(
+      (b) =>
+        b.date === dateStr && rangesOverlap(b.startTime, b.endTime, roomStartTime, roomEndTime),
+    );
+    if (hasConflict) {
+      toast.error("Кабинет уже занят в это время");
+      return;
+    }
+
     const isFirstVisit = patient.info.admissionDate === dateStr;
     addAppointment({
       id: `a-${Date.now()}`,
@@ -67,6 +90,9 @@ export default function BookAppointmentPage() {
       time,
       type: isFirstVisit ? "Первичный приём" : "Индивидуальное занятие",
       doctorName,
+      roomId,
+      roomStartTime,
+      roomEndTime,
     });
     setSaved(true);
   }
@@ -84,6 +110,8 @@ export default function BookAppointmentPage() {
             <Row label="Врач" value={doctorName} />
             <Row label="Дата" value={formatRuDateLong(date)} />
             <Row label="Время" value={time} />
+            <Row label="Кабинет" value={selectedRoom?.name ?? "—"} />
+            <Row label="Время кабинета" value={`${roomStartTime}–${roomEndTime}`} />
           </CardContent>
         </Card>
         <Button className="w-full" render={<Link to="/nurse/patients" />}>
@@ -200,8 +228,79 @@ export default function BookAppointmentPage() {
         </Card>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Кабинет и время занятости</CardTitle>
+          <CardDescription>Выберите кабинет и период, на который он будет занят</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-3">
+          <div className="flex flex-col gap-1.5">
+            <Label>Кабинет</Label>
+            <Select value={roomId} onValueChange={(v) => v && setRoomId(v)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Выберите кабинет">
+                  {(v: string | null) => rooms.find((r) => r.id === v)?.name ?? "Выберите кабинет"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {rooms.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {r.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Время с</Label>
+            <Select
+              value={roomStartTime ?? ""}
+              onValueChange={(v) => {
+                if (!v) return;
+                setRoomStartTime(v);
+                if (roomEndTime && timeToMinutes(roomEndTime) <= timeToMinutes(v)) {
+                  setRoomEndTime(null);
+                }
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="—" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeOptions.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Время по</Label>
+            <Select value={roomEndTime ?? ""} onValueChange={(v) => v && setRoomEndTime(v)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="—" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeOptions
+                  .filter((t) => !roomStartTime || timeToMinutes(t) > timeToMinutes(roomStartTime))
+                  .map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex justify-end">
-        <Button onClick={handleSave} className="gap-1.5" disabled={!time}>
+        <Button
+          onClick={handleSave}
+          className="gap-1.5"
+          disabled={!time || !roomId || !roomStartTime || !roomEndTime}
+        >
           <CalendarCheck2 className="size-4" /> Сохранить запись пациента
         </Button>
       </div>
