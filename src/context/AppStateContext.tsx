@@ -5,14 +5,15 @@ import type {
   DiaryEntry,
   Patient,
   PatientInfo,
+  Position,
   SpeechCard,
   StaffMember,
 } from "@/data/types";
-import { demoUsers } from "@/data/users";
 import { initialPatients } from "@/data/patients";
 import { appointments as initialAppointments } from "@/data/appointments";
 import { initialDiaryEntries } from "@/data/diary";
 import { initialStaff } from "@/data/staff";
+import { initialPositions } from "@/data/positions";
 import { fundingTypes } from "@/data/misc";
 import { buildSessions, renumberSessions } from "@/lib/therapy";
 
@@ -23,7 +24,7 @@ interface InstitutionSettings {
 
 interface AppStateValue {
   currentUser: DemoUser | null;
-  login: (userId: string) => void;
+  login: (user: DemoUser) => void;
   logout: () => void;
 
   patients: Patient[];
@@ -66,6 +67,11 @@ interface AppStateValue {
   addStaffMember: (member: StaffMember) => void;
   updateStaffMember: (staffId: string, updates: Omit<StaffMember, "id">) => void;
 
+  positions: Position[];
+  addPosition: (position: Position) => void;
+  updatePosition: (positionId: string, title: string) => void;
+  removePosition: (positionId: string) => void;
+
   institution: InstitutionSettings;
   updateInstitution: (settings: InstitutionSettings) => void;
 }
@@ -78,15 +84,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>(initialDiaryEntries);
   const [staff, setStaff] = useState<StaffMember[]>(initialStaff);
+  const [positions, setPositions] = useState<Position[]>(initialPositions);
   const [institution, setInstitution] = useState<InstitutionSettings>({
     name: "Центр логопедической реабилитации «Навигатор»",
     funding: fundingTypes.filter((f) => f.id === "oms" || f.id === "paid").map((f) => f.id),
   });
 
-  const login = (userId: string) => {
-    const user = demoUsers.find((u) => u.id === userId) ?? null;
-    setCurrentUser(user);
-  };
+  const login = (user: DemoUser) => setCurrentUser(user);
 
   const logout = () => setCurrentUser(null);
 
@@ -301,6 +305,16 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setStaff((prev) => prev.map((s) => (s.id === staffId ? { ...s, ...updates } : s)));
   };
 
+  const addPosition = (position: Position) => setPositions((prev) => [...prev, position]);
+
+  const updatePosition = (positionId: string, title: string) => {
+    setPositions((prev) => prev.map((p) => (p.id === positionId ? { ...p, title } : p)));
+  };
+
+  const removePosition = (positionId: string) => {
+    setPositions((prev) => prev.filter((p) => p.id !== positionId));
+  };
+
   const updateInstitution = (settings: InstitutionSettings) => setInstitution(settings);
 
   const value = useMemo<AppStateValue>(
@@ -334,10 +348,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       staff,
       addStaffMember,
       updateStaffMember,
+      positions,
+      addPosition,
+      updatePosition,
+      removePosition,
       institution,
       updateInstitution,
     }),
-    [currentUser, patients, appointments, diaryEntries, staff, institution],
+    [currentUser, patients, appointments, diaryEntries, staff, positions, institution],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

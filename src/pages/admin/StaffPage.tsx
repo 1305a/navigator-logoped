@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAppState } from "@/context/AppStateContext";
 import { roleLabels } from "@/data/users";
-import type { Role, StaffMember } from "@/data/types";
+import type { Position, Role, StaffMember } from "@/data/types";
 import {
   Table,
   TableBody,
@@ -55,8 +55,35 @@ function RoleSelect({ value, onChange }: { value: Role; onChange: (role: Role) =
   );
 }
 
+function PositionSelect({
+  value,
+  onChange,
+  positions,
+}: {
+  value: string;
+  onChange: (title: string) => void;
+  positions: Position[];
+}) {
+  return (
+    <Select value={value} onValueChange={(v) => v && onChange(v)}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder="Выберите должность">
+          {(v: string | null) => v ?? "Выберите должность"}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {positions.map((p) => (
+          <SelectItem key={p.id} value={p.title}>
+            {p.title}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
 export default function StaffPage() {
-  const { staff, addStaffMember, updateStaffMember } = useAppState();
+  const { staff, addStaffMember, updateStaffMember, positions } = useAppState();
 
   const [open, setOpen] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -65,14 +92,14 @@ export default function StaffPage() {
   const [active, setActive] = useState(true);
 
   function handleAdd() {
-    if (!fullName.trim() || !position.trim()) {
+    if (!fullName.trim() || !position) {
       toast.error("Заполните ФИО и должность");
       return;
     }
     addStaffMember({
       id: `s-${Date.now()}`,
       fullName: fullName.trim(),
-      position: position.trim(),
+      position,
       role,
       active,
     });
@@ -100,13 +127,13 @@ export default function StaffPage() {
 
   function handleSaveEdit() {
     if (!editingStaff) return;
-    if (!editFullName.trim() || !editPosition.trim()) {
+    if (!editFullName.trim() || !editPosition) {
       toast.error("Заполните ФИО и должность");
       return;
     }
     updateStaffMember(editingStaff.id, {
       fullName: editFullName.trim(),
-      position: editPosition.trim(),
+      position: editPosition,
       role: editRole,
       active: editActive,
     });
@@ -138,7 +165,7 @@ export default function StaffPage() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Должность</Label>
-                <Input value={position} onChange={(e) => setPosition(e.target.value)} />
+                <PositionSelect value={position} onChange={setPosition} positions={positions} />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Роль</Label>
@@ -212,7 +239,7 @@ export default function StaffPage() {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Должность</Label>
-              <Input value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
+              <PositionSelect value={editPosition} onChange={setEditPosition} positions={positions} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Роль</Label>

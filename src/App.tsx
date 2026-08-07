@@ -33,6 +33,7 @@ import DocumentsPage from "@/pages/nurse/DocumentsPage";
 import AdminLayout from "@/layouts/AdminLayout";
 import GeneralPage from "@/pages/admin/GeneralPage";
 import StaffPage from "@/pages/admin/StaffPage";
+import PositionsPage from "@/pages/admin/PositionsPage";
 
 export default function App() {
   return (
@@ -111,6 +112,7 @@ export default function App() {
         <Route index element={<Navigate to="/admin/general" replace />} />
         <Route path="general" element={<GeneralPage />} />
         <Route path="staff" element={<StaffPage />} />
+        <Route path="positions" element={<PositionsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

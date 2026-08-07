@@ -117,3 +117,8 @@ export interface StaffMember {
   role: Role;
   active: boolean;
 }
+
+export interface Position {
+  id: string;
+  title: string;
+}

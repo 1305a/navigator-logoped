@@ -2,25 +2,49 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppState } from "@/context/AppStateContext";
 import { demoUsers, roleLabels } from "@/data/users";
+import type { DemoUser, StaffMember } from "@/data/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Stethoscope } from "lucide-react";
 
+function staffToDemoUser(s: StaffMember): DemoUser {
+  const [surname, firstName, patronymic] = s.fullName.split(" ");
+  return {
+    id: s.id,
+    role: s.role,
+    fullName: s.fullName,
+    shortName: [firstName, patronymic].filter(Boolean).join(" "),
+    avatarInitials: `${firstName?.[0] ?? ""}${surname?.[0] ?? ""}`,
+  };
+}
+
 export default function LoginPage() {
-  const { login } = useAppState();
+  const { login, staff } = useAppState();
   const navigate = useNavigate();
-  const [selectedUserId, setSelectedUserId] = useState(demoUsers[0].id);
+
+  const staffUsers = staff.filter((s) => s.active).map(staffToDemoUser);
+  const patientUsers = demoUsers.filter((u) => u.role === "patient");
+  const loginableUsers = [...staffUsers, ...patientUsers];
+
+  const [selectedUserId, setSelectedUserId] = useState(loginableUsers[0]?.id ?? "");
   const [password, setPassword] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const user = demoUsers.find((u) => u.id === selectedUserId);
+    const user = loginableUsers.find((u) => u.id === selectedUserId);
     if (!user) return;
-    login(user.id);
+    login(user);
     navigate(`/${user.role}`);
   }
 
@@ -46,35 +70,39 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
                 <Label>Пользователь</Label>
-                <div className="flex flex-col gap-2">
-                  {demoUsers.map((user) => (
-                    <button
-                      type="button"
-                      key={user.id}
-                      onClick={() => setSelectedUserId(user.id)}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors",
-                        selectedUserId === user.id
-                          ? "border-primary bg-accent"
-                          : "border-border hover:bg-muted/60",
-                      )}
-                    >
-                      <Avatar className="size-9">
-                        <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-                          {user.avatarInitials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">
-                          {user.fullName}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          ({roleLabels[user.role]})
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <Select
+                  value={selectedUserId}
+                  onValueChange={(v) => v && setSelectedUserId(v)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Выберите пользователя">
+                      {(id: string | null) => {
+                        const user = loginableUsers.find((u) => u.id === id);
+                        return user
+                          ? `${user.fullName} (${roleLabels[user.role]})`
+                          : "Выберите пользователя";
+                      }}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Сотрудники</SelectLabel>
+                      {staffUsers.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.fullName} ({roleLabels[user.role]})
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Пациент</SelectLabel>
+                      {patientUsers.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.fullName} ({roleLabels[user.role]})
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex flex-col gap-2">
