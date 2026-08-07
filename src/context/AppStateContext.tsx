@@ -17,7 +17,6 @@ import { initialDiaryEntries } from "@/data/diary";
 import { initialStaff } from "@/data/staff";
 import { initialPositions } from "@/data/positions";
 import { initialRooms } from "@/data/rooms";
-import { fundingTypes } from "@/data/misc";
 import { buildSessions, renumberSessions } from "@/lib/therapy";
 
 type SessionScheduleDetails =
@@ -26,7 +25,13 @@ type SessionScheduleDetails =
 
 interface InstitutionSettings {
   name: string;
-  funding: string[];
+  address: string;
+  shortName: string;
+  headDoctorId: string;
+  facilityType: string;
+  institutionType: string;
+  bedFunction: number;
+  sortOrder: number;
 }
 
 interface AppStateValue {
@@ -105,7 +110,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [institution, setInstitution] = useState<InstitutionSettings>({
     name: "Центр логопедической реабилитации «Навигатор»",
-    funding: fundingTypes.filter((f) => f.id === "oms" || f.id === "paid").map((f) => f.id),
+    address: "г. Москва, ул. Речевая, д. 5",
+    shortName: "Навигатор",
+    headDoctorId: initialStaff.find((s) => s.role === "admin")?.id ?? "",
+    facilityType: "Реабилитационный центр",
+    institutionType: "Логопедический центр",
+    bedFunction: 0,
+    sortOrder: 1,
   });
 
   const login = (user: DemoUser) => setCurrentUser(user);

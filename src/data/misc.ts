@@ -26,10 +26,3 @@ export const patientStatistics = {
   completedExercises: 34,
   avgRating: 4.5,
 };
-
-export const fundingTypes = [
-  { id: "budget", label: "Бюджет" },
-  { id: "oms", label: "ОМС" },
-  { id: "dms", label: "ДМС" },
-  { id: "paid", label: "Платные услуги" },
-];

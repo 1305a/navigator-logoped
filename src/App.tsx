@@ -31,7 +31,7 @@ import BookAppointmentPage from "@/pages/nurse/BookAppointmentPage";
 import DocumentsPage from "@/pages/nurse/DocumentsPage";
 
 import AdminLayout from "@/layouts/AdminLayout";
-import GeneralPage from "@/pages/admin/GeneralPage";
+import InstitutionPage from "@/pages/admin/InstitutionPage";
 import StaffPage from "@/pages/admin/StaffPage";
 import PositionsPage from "@/pages/admin/PositionsPage";
 import RoomsPage from "@/pages/admin/RoomsPage";
@@ -110,8 +110,8 @@ export default function App() {
           </RequireRole>
         }
       >
-        <Route index element={<Navigate to="/admin/general" replace />} />
-        <Route path="general" element={<GeneralPage />} />
+        <Route index element={<Navigate to="/admin/institution" replace />} />
+        <Route path="institution" element={<InstitutionPage />} />
         <Route path="staff" element={<StaffPage />} />
         <Route path="positions" element={<PositionsPage />} />
         <Route path="rooms" element={<RoomsPage />} />
