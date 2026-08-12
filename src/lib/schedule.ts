@@ -1,4 +1,4 @@
-export function generateTimeOptions(stepMinutes = 10, startHour = 8, endHour = 20): string[] {
+export function generateTimeOptions(stepMinutes = 15, startHour = 8, endHour = 20): string[] {
   const options: string[] = [];
   for (let m = startHour * 60; m <= endHour * 60; m += stepMinutes) {
     const h = Math.floor(m / 60)
