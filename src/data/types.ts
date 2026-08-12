@@ -56,7 +56,8 @@ export interface TherapySession {
   scheduledDate: string | null;
   startTime: string | null;
   endTime: string | null;
-  bookingId: string | null;
+  roomBookingId: string | null;
+  staffBookingId: string | null;
 }
 
 export interface RoomBooking {
@@ -135,15 +136,31 @@ export interface DiaryEntry {
   text: string;
 }
 
+export interface StaffBooking {
+  id: string;
+  activityType: string;
+  dateFrom: string;
+  dateTo: string;
+  startTime: string | null;
+  endTime: string | null;
+  note: string;
+}
+
 export interface StaffMember {
   id: string;
   fullName: string;
   position: string;
   role: Role;
   active: boolean;
+  bookings: StaffBooking[];
 }
 
 export interface Position {
+  id: string;
+  title: string;
+}
+
+export interface EmployeeActivityType {
   id: string;
   title: string;
 }

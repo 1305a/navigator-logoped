@@ -35,6 +35,7 @@ import InstitutionPage from "@/pages/admin/InstitutionPage";
 import StaffPage from "@/pages/admin/StaffPage";
 import PositionsPage from "@/pages/admin/PositionsPage";
 import RoomsPage from "@/pages/admin/RoomsPage";
+import EmployeeActivityTypesPage from "@/pages/admin/EmployeeActivityTypesPage";
 
 export default function App() {
   return (
@@ -115,6 +116,7 @@ export default function App() {
         <Route path="staff" element={<StaffPage />} />
         <Route path="positions" element={<PositionsPage />} />
         <Route path="rooms" element={<RoomsPage />} />
+        <Route path="activity-types" element={<EmployeeActivityTypesPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

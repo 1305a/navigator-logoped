@@ -153,7 +153,7 @@ export default function SessionDetailPage({
     const room = rooms.find((r) => r.id === scheduleRoomId);
     const hasConflict = room?.bookings.some(
       (b) =>
-        b.id !== session.bookingId &&
+        b.id !== session.roomBookingId &&
         b.date === dateStr &&
         rangesOverlap(b.startTime, b.endTime, scheduleStartTime, scheduleEndTime),
     );

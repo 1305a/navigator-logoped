@@ -25,7 +25,8 @@ export function buildSessions(
       scheduledDate: null,
       startTime: null,
       endTime: null,
-      bookingId: null,
+      roomBookingId: null,
+      staffBookingId: null,
     };
   });
 }
