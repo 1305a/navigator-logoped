@@ -73,7 +73,13 @@ export interface RoomBooking {
 export interface Room {
   id: string;
   name: string;
+  roomType: string;
   bookings: RoomBooking[];
+}
+
+export interface RoomType {
+  id: string;
+  title: string;
 }
 
 export interface ExerciseReport {
@@ -163,4 +169,17 @@ export interface Position {
 export interface EmployeeActivityType {
   id: string;
   title: string;
+}
+
+export interface RolePermission {
+  blockId: string;
+  read: boolean;
+  edit: boolean;
+}
+
+export interface AppRole {
+  id: string;
+  title: string;
+  interfaceKey: Role | "";
+  permissions: RolePermission[];
 }

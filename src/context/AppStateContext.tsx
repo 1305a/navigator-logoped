@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import type {
   Appointment,
+  AppRole,
   DemoUser,
   DiaryEntry,
   EmployeeActivityType,
@@ -8,6 +9,7 @@ import type {
   PatientInfo,
   Position,
   Room,
+  RoomType,
   SpeechCard,
   StaffBooking,
   StaffMember,
@@ -19,11 +21,13 @@ import { initialDiaryEntries } from "@/data/diary";
 import { initialStaff } from "@/data/staff";
 import { initialPositions } from "@/data/positions";
 import { initialRooms } from "@/data/rooms";
+import { initialRoomTypes } from "@/data/roomTypes";
 import {
   initialEmployeeActivityTypes,
   PATIENT_APPOINTMENT_ACTIVITY,
   PATIENT_SESSION_ACTIVITY,
 } from "@/data/employeeActivityTypes";
+import { initialAppRoles } from "@/data/appRoles";
 import { buildSessions, renumberSessions } from "@/lib/therapy";
 
 type SessionScheduleDetails =
@@ -104,8 +108,18 @@ interface AppStateValue {
 
   rooms: Room[];
   addRoom: (room: Room) => void;
-  updateRoom: (roomId: string, name: string) => void;
+  updateRoom: (roomId: string, updates: Omit<Room, "id" | "bookings">) => void;
   removeRoom: (roomId: string) => void;
+
+  roomTypes: RoomType[];
+  addRoomType: (roomType: RoomType) => void;
+  updateRoomType: (roomTypeId: string, title: string) => void;
+  removeRoomType: (roomTypeId: string) => void;
+
+  appRoles: AppRole[];
+  addAppRole: (role: AppRole) => void;
+  updateAppRole: (roleId: string, updates: Omit<AppRole, "id">) => void;
+  removeAppRole: (roleId: string) => void;
 
   institution: InstitutionSettings;
   updateInstitution: (settings: InstitutionSettings) => void;
@@ -121,9 +135,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [staff, setStaff] = useState<StaffMember[]>(initialStaff);
   const [positions, setPositions] = useState<Position[]>(initialPositions);
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>(initialRoomTypes);
   const [activityTypes, setActivityTypes] = useState<EmployeeActivityType[]>(
     initialEmployeeActivityTypes,
   );
+  const [appRoles, setAppRoles] = useState<AppRole[]>(initialAppRoles);
   const [institution, setInstitution] = useState<InstitutionSettings>({
     name: "Центр логопедической реабилитации «Навигатор»",
     address: "г. Москва, ул. Речевая, д. 5",
@@ -628,12 +644,32 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
 
   const addRoom = (room: Room) => setRooms((prev) => [...prev, room]);
 
-  const updateRoom = (roomId: string, name: string) => {
-    setRooms((prev) => prev.map((r) => (r.id === roomId ? { ...r, name } : r)));
+  const updateRoom = (roomId: string, updates: Omit<Room, "id" | "bookings">) => {
+    setRooms((prev) => prev.map((r) => (r.id === roomId ? { ...r, ...updates } : r)));
   };
 
   const removeRoom = (roomId: string) => {
     setRooms((prev) => prev.filter((r) => r.id !== roomId));
+  };
+
+  const addRoomType = (roomType: RoomType) => setRoomTypes((prev) => [...prev, roomType]);
+
+  const updateRoomType = (roomTypeId: string, title: string) => {
+    setRoomTypes((prev) => prev.map((t) => (t.id === roomTypeId ? { ...t, title } : t)));
+  };
+
+  const removeRoomType = (roomTypeId: string) => {
+    setRoomTypes((prev) => prev.filter((t) => t.id !== roomTypeId));
+  };
+
+  const addAppRole = (role: AppRole) => setAppRoles((prev) => [...prev, role]);
+
+  const updateAppRole = (roleId: string, updates: Omit<AppRole, "id">) => {
+    setAppRoles((prev) => prev.map((r) => (r.id === roleId ? { ...r, ...updates } : r)));
+  };
+
+  const removeAppRole = (roleId: string) => {
+    setAppRoles((prev) => prev.filter((r) => r.id !== roleId));
   };
 
   const updateInstitution = (settings: InstitutionSettings) => setInstitution(settings);
@@ -683,6 +719,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       addRoom,
       updateRoom,
       removeRoom,
+      roomTypes,
+      addRoomType,
+      updateRoomType,
+      removeRoomType,
+      appRoles,
+      addAppRole,
+      updateAppRole,
+      removeAppRole,
       institution,
       updateInstitution,
     }),
@@ -695,6 +739,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       activityTypes,
       positions,
       rooms,
+      roomTypes,
+      appRoles,
       institution,
     ],
   );
