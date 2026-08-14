@@ -13,7 +13,98 @@ import { Button } from "@/components/ui/button";
 import { exerciseBank } from "@/data/exercises";
 import { wordPartExercises } from "@/data/wordPartsTrainer";
 import { letterFixTasks } from "@/data/letterFixTrainer";
+import { wordEndingBlocks } from "@/data/wordEndingsTrainer";
+import { phraseBuilderPhrases } from "@/data/phraseBuilderTrainer";
+import { phraseImageLevels } from "@/data/phraseImageMatchTrainer";
+import { adjNounTasks } from "@/data/adjectiveNounTrainer";
+import { verbImageTasks } from "@/data/verbToImageTrainer";
+import { syllableInsertTasks } from "@/data/syllableInsertTrainer";
+import { verbPrefixTasks } from "@/data/verbPrefixTrainer";
+import { verbWordsExercises } from "@/data/verbWordsTrainer";
 import { Gamepad2, Play, Timer, Wrench } from "lucide-react";
+
+const trainerCatalog = [
+  {
+    path: "trainer/word-parts",
+    category: "Грамматика",
+    title: "Добавить часть слова (начало/конец)",
+    description: "Словообразование: подставьте части слова до или после общей части",
+    count: wordPartExercises.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/letter-fix",
+    category: "Звукопроизношение",
+    title: "Исправь букву в слове",
+    description: "Выберите правильную гласную букву в слове по картинке",
+    count: letterFixTasks.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/word-endings",
+    category: "Словообразование",
+    title: "Найти окончание слов",
+    description: "Выберите правильные окончания слов и распределите их по трём веерам",
+    count: wordEndingBlocks.length,
+    duration: "4 мин",
+  },
+  {
+    path: "trainer/phrase-builder",
+    category: "Связная речь",
+    title: "Составление фразы по картинке",
+    description: "Составьте предложение из трёх слов (кто? что делает? что?) по изображению",
+    count: phraseBuilderPhrases.length,
+    duration: "3 мин",
+  },
+  {
+    path: "trainer/phrase-image-match",
+    category: "Связная речь",
+    title: "Фраза и картинка",
+    description: "Подберите подпись к картинке — соответствие фразы и изображения",
+    count: phraseImageLevels.reduce((sum, l) => sum + l.tasks.length, 0),
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/adjective-noun",
+    category: "Грамматика",
+    title: "Прилагательное и существительное",
+    description: "Прослушайте словосочетание и выберите подходящую картинку",
+    count: adjNounTasks.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/verb-to-image",
+    category: "Грамматика",
+    title: "Глагол к картинке",
+    description: "Прослушайте слово и действие, ответьте «да» или «нет»",
+    count: verbImageTasks.length,
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/syllable-insert",
+    category: "Слоговая структура",
+    title: "Вставь слог в слово",
+    description: "Выберите подходящий слог и вставьте его в пропуск в слове",
+    count: syllableInsertTasks.length,
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/verb-prefix",
+    category: "Грамматика",
+    title: "Глагол с приставками",
+    description: "Добавьте приставку к глаголу в каждом предложении",
+    count: verbPrefixTasks.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/verb-words",
+    category: "Грамматика",
+    title: "Слова-действия и есть глаголы",
+    description: "Подберите слова-действия к глаголам",
+    count: verbWordsExercises.length,
+    duration: "5 мин",
+  },
+];
 
 export default function ExerciseBankPage() {
   return (
@@ -66,64 +157,31 @@ export default function ExerciseBankPage() {
 
         <TabsContent value="trainers" className="mt-4">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <Badge variant="secondary" className="w-fit">
-                  Грамматика
-                </Badge>
-                <CardTitle className="text-base">
-                  Добавить часть слова (начало/конец)
-                </CardTitle>
-                <CardDescription>
-                  Словообразование: подставьте части слова до или после общей части —
-                  {" "}
-                  {wordPartExercises.length} заданий.
-                </CardDescription>
-                <CardAction>
-                  <Gamepad2 className="size-4 text-muted-foreground" />
-                </CardAction>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Timer className="size-3.5" />5 мин
-                </div>
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  render={<Link to="trainer/word-parts" />}
-                >
-                  <Play className="size-3.5" /> Запустить
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Badge variant="secondary" className="w-fit">
-                  Звукопроизношение
-                </Badge>
-                <CardTitle className="text-base">Исправь букву в слове</CardTitle>
-                <CardDescription>
-                  Выберите правильную гласную букву в слове по картинке —{" "}
-                  {letterFixTasks.length} заданий.
-                </CardDescription>
-                <CardAction>
-                  <Gamepad2 className="size-4 text-muted-foreground" />
-                </CardAction>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Timer className="size-3.5" />5 мин
-                </div>
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  render={<Link to="trainer/letter-fix" />}
-                >
-                  <Play className="size-3.5" /> Запустить
-                </Button>
-              </CardContent>
-            </Card>
+            {trainerCatalog.map((trainer) => (
+              <Card key={trainer.path}>
+                <CardHeader>
+                  <Badge variant="secondary" className="w-fit">
+                    {trainer.category}
+                  </Badge>
+                  <CardTitle className="text-base">{trainer.title}</CardTitle>
+                  <CardDescription>
+                    {trainer.description} — {trainer.count} заданий.
+                  </CardDescription>
+                  <CardAction>
+                    <Gamepad2 className="size-4 text-muted-foreground" />
+                  </CardAction>
+                </CardHeader>
+                <CardContent className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Timer className="size-3.5" />
+                    {trainer.duration}
+                  </div>
+                  <Button size="sm" className="gap-1.5" render={<Link to={trainer.path} />}>
+                    <Play className="size-3.5" /> Запустить
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </TabsContent>
       </Tabs>

@@ -9,6 +9,14 @@ import SchedulePage from "@/pages/logoped/SchedulePage";
 import ExerciseBankPage from "@/pages/logoped/ExerciseBankPage";
 import WordPartsTrainerPage from "@/pages/logoped/WordPartsTrainerPage";
 import LetterFixTrainerPage from "@/pages/logoped/LetterFixTrainerPage";
+import WordEndingsTrainerPage from "@/pages/logoped/WordEndingsTrainerPage";
+import PhraseBuilderTrainerPage from "@/pages/logoped/PhraseBuilderTrainerPage";
+import PhraseImageMatchTrainerPage from "@/pages/logoped/PhraseImageMatchTrainerPage";
+import AdjectiveNounTrainerPage from "@/pages/logoped/AdjectiveNounTrainerPage";
+import VerbToImageTrainerPage from "@/pages/logoped/VerbToImageTrainerPage";
+import SyllableInsertTrainerPage from "@/pages/logoped/SyllableInsertTrainerPage";
+import VerbPrefixTrainerPage from "@/pages/logoped/VerbPrefixTrainerPage";
+import VerbWordsTrainerPage from "@/pages/logoped/VerbWordsTrainerPage";
 import PatientsListPage from "@/pages/logoped/PatientsListPage";
 import PatientDetailPage from "@/pages/logoped/PatientDetailPage";
 import LogopedProfilePage from "@/pages/logoped/ProfilePage";
@@ -59,6 +67,20 @@ export default function App() {
         <Route path="exercise-bank" element={<ExerciseBankPage />} />
         <Route path="exercise-bank/trainer/word-parts" element={<WordPartsTrainerPage />} />
         <Route path="exercise-bank/trainer/letter-fix" element={<LetterFixTrainerPage />} />
+        <Route path="exercise-bank/trainer/word-endings" element={<WordEndingsTrainerPage />} />
+        <Route path="exercise-bank/trainer/phrase-builder" element={<PhraseBuilderTrainerPage />} />
+        <Route
+          path="exercise-bank/trainer/phrase-image-match"
+          element={<PhraseImageMatchTrainerPage />}
+        />
+        <Route path="exercise-bank/trainer/adjective-noun" element={<AdjectiveNounTrainerPage />} />
+        <Route path="exercise-bank/trainer/verb-to-image" element={<VerbToImageTrainerPage />} />
+        <Route
+          path="exercise-bank/trainer/syllable-insert"
+          element={<SyllableInsertTrainerPage />}
+        />
+        <Route path="exercise-bank/trainer/verb-prefix" element={<VerbPrefixTrainerPage />} />
+        <Route path="exercise-bank/trainer/verb-words" element={<VerbWordsTrainerPage />} />
         <Route path="patients" element={<PatientsListPage />} />
         <Route path="patients/:patientId" element={<PatientDetailPage />} />
         <Route
