@@ -7,6 +7,8 @@ import LogopedLayout from "@/layouts/LogopedLayout";
 import LogopedDashboardPage from "@/pages/logoped/DashboardPage";
 import SchedulePage from "@/pages/logoped/SchedulePage";
 import ExerciseBankPage from "@/pages/logoped/ExerciseBankPage";
+import WordPartsTrainerPage from "@/pages/logoped/WordPartsTrainerPage";
+import LetterFixTrainerPage from "@/pages/logoped/LetterFixTrainerPage";
 import PatientsListPage from "@/pages/logoped/PatientsListPage";
 import PatientDetailPage from "@/pages/logoped/PatientDetailPage";
 import LogopedProfilePage from "@/pages/logoped/ProfilePage";
@@ -55,6 +57,8 @@ export default function App() {
         <Route index element={<LogopedDashboardPage />} />
         <Route path="schedule" element={<SchedulePage />} />
         <Route path="exercise-bank" element={<ExerciseBankPage />} />
+        <Route path="exercise-bank/trainer/word-parts" element={<WordPartsTrainerPage />} />
+        <Route path="exercise-bank/trainer/letter-fix" element={<LetterFixTrainerPage />} />
         <Route path="patients" element={<PatientsListPage />} />
         <Route path="patients/:patientId" element={<PatientDetailPage />} />
         <Route
