@@ -17,6 +17,16 @@ import VerbToImageTrainerPage from "@/pages/logoped/VerbToImageTrainerPage";
 import SyllableInsertTrainerPage from "@/pages/logoped/SyllableInsertTrainerPage";
 import VerbPrefixTrainerPage from "@/pages/logoped/VerbPrefixTrainerPage";
 import VerbWordsTrainerPage from "@/pages/logoped/VerbWordsTrainerPage";
+import WordFeaturesTrainerPage from "@/pages/logoped/WordFeaturesTrainerPage";
+import VerbPhrasesTrainerPage from "@/pages/logoped/VerbPhrasesTrainerPage";
+import AnagramsTrainerPage from "@/pages/logoped/AnagramsTrainerPage";
+import PhraseAssemblyTrainerPage from "@/pages/logoped/PhraseAssemblyTrainerPage";
+import CommonNounTrainerPage from "@/pages/logoped/CommonNounTrainerPage";
+import CommonAdjectiveTrainerPage from "@/pages/logoped/CommonAdjectiveTrainerPage";
+import ParonymsTrainerPage from "@/pages/logoped/ParonymsTrainerPage";
+import ComposePhraseTrainerPage from "@/pages/logoped/ComposePhraseTrainerPage";
+import MissingLettersTrainerPage from "@/pages/logoped/MissingLettersTrainerPage";
+import PrepositionsTrainerPage from "@/pages/logoped/PrepositionsTrainerPage";
 import PatientsListPage from "@/pages/logoped/PatientsListPage";
 import PatientDetailPage from "@/pages/logoped/PatientDetailPage";
 import LogopedProfilePage from "@/pages/logoped/ProfilePage";
@@ -81,6 +91,16 @@ export default function App() {
         />
         <Route path="exercise-bank/trainer/verb-prefix" element={<VerbPrefixTrainerPage />} />
         <Route path="exercise-bank/trainer/verb-words" element={<VerbWordsTrainerPage />} />
+        <Route path="exercise-bank/trainer/word-features" element={<WordFeaturesTrainerPage />} />
+        <Route path="exercise-bank/trainer/verb-phrases" element={<VerbPhrasesTrainerPage />} />
+        <Route path="exercise-bank/trainer/anagrams" element={<AnagramsTrainerPage />} />
+        <Route path="exercise-bank/trainer/phrase-assembly" element={<PhraseAssemblyTrainerPage />} />
+        <Route path="exercise-bank/trainer/common-noun" element={<CommonNounTrainerPage />} />
+        <Route path="exercise-bank/trainer/common-adjective" element={<CommonAdjectiveTrainerPage />} />
+        <Route path="exercise-bank/trainer/paronyms" element={<ParonymsTrainerPage />} />
+        <Route path="exercise-bank/trainer/compose-phrase" element={<ComposePhraseTrainerPage />} />
+        <Route path="exercise-bank/trainer/missing-letters" element={<MissingLettersTrainerPage />} />
+        <Route path="exercise-bank/trainer/prepositions" element={<PrepositionsTrainerPage />} />
         <Route path="patients" element={<PatientsListPage />} />
         <Route path="patients/:patientId" element={<PatientDetailPage />} />
         <Route

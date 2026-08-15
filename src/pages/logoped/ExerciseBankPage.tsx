@@ -21,6 +21,16 @@ import { verbImageTasks } from "@/data/verbToImageTrainer";
 import { syllableInsertTasks } from "@/data/syllableInsertTrainer";
 import { verbPrefixTasks } from "@/data/verbPrefixTrainer";
 import { verbWordsExercises } from "@/data/verbWordsTrainer";
+import { wordFeaturesExercises } from "@/data/wordFeaturesTrainer";
+import { verbPhraseExercises } from "@/data/verbPhrasesTrainer";
+import { anagramTasks } from "@/data/anagramsTrainer";
+import { phraseAssemblyTasks } from "@/data/phraseAssemblyTrainer";
+import { commonNounExercises } from "@/data/commonNounTrainer";
+import { commonAdjectiveExercises } from "@/data/commonAdjectiveTrainer";
+import { paronymTasks } from "@/data/paronymsTrainer";
+import { composePhraseTasks } from "@/data/composePhraseTrainer";
+import { missingLettersTasks } from "@/data/missingLettersTrainer";
+import { prepositionLevels } from "@/data/prepositionsTrainer";
 import { Gamepad2, Play, Timer, Wrench } from "lucide-react";
 
 const trainerCatalog = [
@@ -103,6 +113,86 @@ const trainerCatalog = [
     description: "Подберите слова-действия к глаголам",
     count: verbWordsExercises.length,
     duration: "5 мин",
+  },
+  {
+    path: "trainer/word-features",
+    category: "Словообразование",
+    title: "Распределить слова (признаки)",
+    description: "Подберите слова-признаки к существительным",
+    count: wordFeaturesExercises.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/verb-phrases",
+    category: "Словосочетания",
+    title: "КОД 07 — Составить словосочетания (действия)",
+    description: "Подберите слова к глаголам (2 слова на каждый глагол)",
+    count: verbPhraseExercises.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/anagrams",
+    category: "Анаграммы",
+    title: "КОД 09 — Анаграммы",
+    description: "Переставьте буквы в слове, чтобы получилось другое слово",
+    count: Object.values(anagramTasks).reduce((sum, words) => sum + words.length, 0),
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/phrase-assembly",
+    category: "Связная речь",
+    title: "Составьте фразы",
+    description: "Составьте предложение из слов по подсказкам",
+    count: phraseAssemblyTasks.reduce((sum, t) => sum + t.phrases.length, 0),
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/common-noun",
+    category: "Словообразование",
+    title: "КОД 06 — Выбрать общее слово (предмет)",
+    description: "Подберите общее слово (предмет) для трёх слов в колонке",
+    count: commonNounExercises.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/common-adjective",
+    category: "Словообразование",
+    title: "КОД 06 — Выбрать общее слово (признак)",
+    description: "Подберите общее слово (признак) для трёх слов в колонке",
+    count: commonAdjectiveExercises.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/paronyms",
+    category: "Словосочетания",
+    title: "Паронимы в словосочетаниях",
+    description: "Подберите подходящее по смыслу слово к прилагательному",
+    count: paronymTasks.reduce((sum, t) => sum + t.phrases.length, 0),
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/compose-phrase",
+    category: "Связная речь",
+    title: "Составь фразу",
+    description: "Составьте фразу по картинке: «Кто? — Что делает? — Что?/Кого?»",
+    count: composePhraseTasks.reduce((sum, t) => sum + t.phrases.length, 0),
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/missing-letters",
+    category: "Чтение",
+    title: "Вставьте пропущенные буквы",
+    description: "Выберите гласную и вставьте её в пропуск в тексте",
+    count: missingLettersTasks.length,
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/prepositions",
+    category: "Грамматика",
+    title: "Вставьте предлоги",
+    description: "Выберите предлог и вставьте его в пропуск в словосочетании",
+    count: prepositionLevels.reduce((sum, l) => sum + l.tasks.length, 0),
+    duration: "6 мин",
   },
 ];
 
