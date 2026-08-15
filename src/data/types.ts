@@ -22,21 +22,34 @@ export interface SpeechCard {
   hobbies: string;
 }
 
-export type ExerciseCategory =
-  | "Артикуляция"
-  | "Дыхание"
-  | "Звукопроизношение"
-  | "Лексика"
-  | "Грамматика"
-  | "Связная речь"
-  | "Фонематический слух";
+export interface WorkSection {
+  id: string;
+  title: string;
+}
 
 export interface Exercise {
   id: string;
   title: string;
-  category: ExerciseCategory;
+  sectionIds: string[];
   description: string;
   duration: string;
+}
+
+export interface TrainerCatalogEntry {
+  path: string;
+  title: string;
+  description: string;
+  count: number;
+  duration: string;
+  sectionIds: string[];
+}
+
+export interface OfflineExercise {
+  id: string;
+  title: string;
+  format: string;
+  description: string;
+  sectionIds: string[];
 }
 
 export interface SessionExercise {

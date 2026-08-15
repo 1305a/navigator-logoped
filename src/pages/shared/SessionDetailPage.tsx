@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppState } from "@/context/AppStateContext";
-import { exerciseBank, getExerciseById } from "@/data/exercises";
 import { getSessionStatus } from "@/lib/therapy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +48,9 @@ export default function SessionDetailPage({
     gradeSession,
     updateSessionSchedule,
     rooms,
+    exercises,
+    getExercise,
+    workSections,
   } = useAppState();
   const navigate = useNavigate();
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
@@ -107,7 +109,7 @@ export default function SessionDetailPage({
   const allDone = session.exercises.length > 0 && session.exercises.every((ex) => ex.done);
   const completed = status === "completed";
   const canEditExercises = allowGrading && !completed;
-  const availableToAdd = exerciseBank.filter(
+  const availableToAdd = exercises.filter(
     (e) => !session.exercises.some((se) => se.exerciseId === e.id),
   );
 
@@ -325,8 +327,11 @@ export default function SessionDetailPage({
             </p>
           )}
           {session.exercises.map((ex) => {
-            const exercise = getExerciseById(ex.exerciseId);
+            const exercise = getExercise(ex.exerciseId);
             if (!exercise) return null;
+            const sectionTitles = exercise.sectionIds
+              .map((id) => workSections.find((s) => s.id === id)?.title)
+              .filter((t): t is string => !!t);
             return (
               <div
                 key={ex.exerciseId}
@@ -335,7 +340,7 @@ export default function SessionDetailPage({
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground">{exercise.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {exercise.category} · {exercise.duration}
+                    {sectionTitles.join(", ")} · {exercise.duration}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
@@ -377,7 +382,7 @@ export default function SessionDetailPage({
                     <SelectValue placeholder="Добавить упражнение из банка">
                       {(value: string | null) =>
                         value
-                          ? exerciseBank.find((e) => e.id === value)?.title
+                          ? exercises.find((e) => e.id === value)?.title
                           : "Добавить упражнение из банка"
                       }
                     </SelectValue>

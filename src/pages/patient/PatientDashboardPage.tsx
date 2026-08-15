@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useAppState } from "@/context/AppStateContext";
-import { getExerciseById } from "@/data/exercises";
 import { getCurrentSession } from "@/lib/therapy";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarClock, ClipboardList, ListChecks, Trophy } from "lucide-react";
 
 export default function PatientDashboardPage() {
-  const { currentUser, patients, appointments } = useAppState();
+  const { currentUser, patients, appointments, getExercise } = useAppState();
   const patient = patients.find((p) => p.id === currentUser?.patientId);
 
   if (!patient) return null;
@@ -93,7 +92,7 @@ export default function PatientDashboardPage() {
           </CardHeader>
           <CardContent className="flex flex-col gap-1">
             {pendingExercises.slice(0, 3).map((ae) => {
-              const ex = getExerciseById(ae.exerciseId);
+              const ex = getExercise(ae.exerciseId);
               if (!ex) return null;
               return (
                 <div key={ae.exerciseId} className="rounded-lg px-2 py-1.5 text-sm text-foreground">

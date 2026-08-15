@@ -3,6 +3,7 @@ import {
   Building2,
   CalendarClock,
   DoorOpen,
+  Layers,
   ShieldCheck,
   Tag,
   Users,
@@ -16,6 +17,7 @@ const menuItems: AppMenuItem[] = [
   { to: "/admin/rooms", label: "Кабинеты", icon: DoorOpen },
   { to: "/admin/room-types", label: "Типы кабинетов", icon: Tag },
   { to: "/admin/activity-types", label: "Тип занятости сотрудника", icon: CalendarClock },
+  { to: "/admin/work-sections", label: "Разделы логопедической работы", icon: Layers },
   { to: "/admin/roles", label: "Роли", icon: ShieldCheck },
 ];
 

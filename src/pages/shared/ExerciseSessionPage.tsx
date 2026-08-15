@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppState } from "@/context/AppStateContext";
-import { getExerciseById } from "@/data/exercises";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { SectionBadgeList } from "@/components/app/SectionBadgeList";
 import {
   Dialog,
   DialogContent,
@@ -38,13 +37,13 @@ export default function ExerciseSessionPage({
   sessionId: string;
 }) {
   const { exerciseId } = useParams<{ exerciseId: string }>();
-  const { setSessionExerciseDone } = useAppState();
+  const { setSessionExerciseDone, getExercise, workSections } = useAppState();
   const navigate = useNavigate();
 
   const [started, setStarted] = useState(false);
   const [report, setReport] = useState<ExerciseReport | null>(null);
 
-  const exercise = exerciseId ? getExerciseById(exerciseId) : undefined;
+  const exercise = exerciseId ? getExercise(exerciseId) : undefined;
 
   if (!exercise) {
     return (
@@ -76,9 +75,7 @@ export default function ExerciseSessionPage({
 
       <Card>
         <CardHeader>
-          <Badge variant="secondary" className="w-fit">
-            {exercise.category}
-          </Badge>
+          <SectionBadgeList sectionIds={exercise.sectionIds} allSections={workSections} />
           <CardTitle className="text-xl">{exercise.title}</CardTitle>
           <CardDescription>{exercise.description}</CardDescription>
         </CardHeader>

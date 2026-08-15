@@ -1,14 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useAppState } from "@/context/AppStateContext";
-import { getExerciseById } from "@/data/exercises";
 import { getCurrentSession } from "@/lib/therapy";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SectionBadgeList } from "@/components/app/SectionBadgeList";
 import { CheckCircle2, ClipboardList, Play, Timer } from "lucide-react";
 
 export default function HomeworkPage() {
-  const { currentUser, patients } = useAppState();
+  const { currentUser, patients, getExercise, workSections } = useAppState();
   const navigate = useNavigate();
   const patient = patients.find((p) => p.id === currentUser?.patientId);
 
@@ -42,15 +42,13 @@ export default function HomeworkPage() {
       {currentSession && (
         <div className="grid gap-4 md:grid-cols-2">
           {currentSession.exercises.map((ae) => {
-            const ex = getExerciseById(ae.exerciseId);
+            const ex = getExercise(ae.exerciseId);
             if (!ex) return null;
             return (
               <Card key={ae.exerciseId} className={ae.done ? "opacity-60" : ""}>
                 <CardHeader>
                   <div className="flex items-start justify-between gap-2">
-                    <Badge variant="secondary" className="w-fit">
-                      {ex.category}
-                    </Badge>
+                    <SectionBadgeList sectionIds={ex.sectionIds} allSections={workSections} />
                     <Badge variant={ae.done ? "secondary" : "outline"} className="gap-1">
                       {ae.done && <CheckCircle2 className="size-3" />}
                       {ae.done ? "выполнено" : "не выполнено"}

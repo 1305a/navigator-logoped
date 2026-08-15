@@ -67,6 +67,7 @@ import PositionsPage from "@/pages/admin/PositionsPage";
 import RoomsPage from "@/pages/admin/RoomsPage";
 import RoomTypesPage from "@/pages/admin/RoomTypesPage";
 import EmployeeActivityTypesPage from "@/pages/admin/EmployeeActivityTypesPage";
+import WorkSectionsPage from "@/pages/admin/WorkSectionsPage";
 import RolesPage from "@/pages/admin/RolesPage";
 
 export default function App() {
@@ -186,6 +187,7 @@ export default function App() {
         <Route path="rooms" element={<RoomsPage />} />
         <Route path="room-types" element={<RoomTypesPage />} />
         <Route path="activity-types" element={<EmployeeActivityTypesPage />} />
+        <Route path="work-sections" element={<WorkSectionsPage />} />
         <Route path="roles" element={<RolesPage />} />
       </Route>
 

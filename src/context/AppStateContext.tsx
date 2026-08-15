@@ -5,6 +5,8 @@ import type {
   DemoUser,
   DiaryEntry,
   EmployeeActivityType,
+  Exercise,
+  OfflineExercise,
   Patient,
   PatientInfo,
   Position,
@@ -14,6 +16,8 @@ import type {
   StaffBooking,
   StaffMember,
   TherapySession,
+  TrainerCatalogEntry,
+  WorkSection,
 } from "@/data/types";
 import { initialPatients } from "@/data/patients";
 import { appointments as initialAppointments } from "@/data/appointments";
@@ -28,6 +32,10 @@ import {
   PATIENT_SESSION_ACTIVITY,
 } from "@/data/employeeActivityTypes";
 import { initialAppRoles } from "@/data/appRoles";
+import { initialWorkSections } from "@/data/workSections";
+import { initialExerciseBank } from "@/data/exercises";
+import { initialTrainerCatalog } from "@/data/trainers";
+import { initialOfflineExercises } from "@/data/offlineExercises";
 import { buildSessions, renumberSessions } from "@/lib/therapy";
 
 type SessionScheduleDetails =
@@ -121,6 +129,24 @@ interface AppStateValue {
   updateAppRole: (roleId: string, updates: Omit<AppRole, "id">) => void;
   removeAppRole: (roleId: string) => void;
 
+  workSections: WorkSection[];
+  addWorkSection: (section: WorkSection) => void;
+  updateWorkSection: (sectionId: string, title: string) => void;
+  removeWorkSection: (sectionId: string) => void;
+
+  exercises: Exercise[];
+  getExercise: (id: string) => Exercise | undefined;
+  addExerciseSection: (exerciseId: string, sectionId: string) => void;
+  removeExerciseSection: (exerciseId: string, sectionId: string) => void;
+
+  trainerCatalog: TrainerCatalogEntry[];
+  addTrainerSection: (path: string, sectionId: string) => void;
+  removeTrainerSection: (path: string, sectionId: string) => void;
+
+  offlineExercises: OfflineExercise[];
+  addOfflineExerciseSection: (exerciseId: string, sectionId: string) => void;
+  removeOfflineExerciseSection: (exerciseId: string, sectionId: string) => void;
+
   institution: InstitutionSettings;
   updateInstitution: (settings: InstitutionSettings) => void;
 }
@@ -140,6 +166,14 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     initialEmployeeActivityTypes,
   );
   const [appRoles, setAppRoles] = useState<AppRole[]>(initialAppRoles);
+  const [workSections, setWorkSections] = useState<WorkSection[]>(initialWorkSections);
+  const [exercises, setExercises] = useState<Exercise[]>(initialExerciseBank);
+  const [trainerCatalog, setTrainerCatalog] = useState<TrainerCatalogEntry[]>(
+    initialTrainerCatalog,
+  );
+  const [offlineExercises, setOfflineExercises] = useState<OfflineExercise[]>(
+    initialOfflineExercises,
+  );
   const [institution, setInstitution] = useState<InstitutionSettings>({
     name: "Центр логопедической реабилитации «Навигатор»",
     address: "г. Москва, ул. Речевая, д. 5",
@@ -672,6 +706,96 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     setAppRoles((prev) => prev.filter((r) => r.id !== roleId));
   };
 
+  const addWorkSection = (section: WorkSection) => setWorkSections((prev) => [...prev, section]);
+
+  const updateWorkSection = (sectionId: string, title: string) => {
+    setWorkSections((prev) => prev.map((s) => (s.id === sectionId ? { ...s, title } : s)));
+  };
+
+  const removeWorkSection = (sectionId: string) => {
+    setWorkSections((prev) => prev.filter((s) => s.id !== sectionId));
+    setExercises((prev) =>
+      prev.map((e) => ({
+        ...e,
+        sectionIds: e.sectionIds.filter((id) => id !== sectionId),
+      })),
+    );
+    setTrainerCatalog((prev) =>
+      prev.map((t) => ({
+        ...t,
+        sectionIds: t.sectionIds.filter((id) => id !== sectionId),
+      })),
+    );
+    setOfflineExercises((prev) =>
+      prev.map((o) => ({
+        ...o,
+        sectionIds: o.sectionIds.filter((id) => id !== sectionId),
+      })),
+    );
+  };
+
+  const getExercise = (id: string) => exercises.find((e) => e.id === id);
+
+  const addExerciseSection = (exerciseId: string, sectionId: string) => {
+    setExercises((prev) =>
+      prev.map((e) =>
+        e.id === exerciseId && !e.sectionIds.includes(sectionId)
+          ? { ...e, sectionIds: [...e.sectionIds, sectionId] }
+          : e,
+      ),
+    );
+  };
+
+  const removeExerciseSection = (exerciseId: string, sectionId: string) => {
+    setExercises((prev) =>
+      prev.map((e) =>
+        e.id === exerciseId
+          ? { ...e, sectionIds: e.sectionIds.filter((id) => id !== sectionId) }
+          : e,
+      ),
+    );
+  };
+
+  const addTrainerSection = (path: string, sectionId: string) => {
+    setTrainerCatalog((prev) =>
+      prev.map((t) =>
+        t.path === path && !t.sectionIds.includes(sectionId)
+          ? { ...t, sectionIds: [...t.sectionIds, sectionId] }
+          : t,
+      ),
+    );
+  };
+
+  const removeTrainerSection = (path: string, sectionId: string) => {
+    setTrainerCatalog((prev) =>
+      prev.map((t) =>
+        t.path === path
+          ? { ...t, sectionIds: t.sectionIds.filter((id) => id !== sectionId) }
+          : t,
+      ),
+    );
+  };
+
+  const addOfflineExerciseSection = (exerciseId: string, sectionId: string) => {
+    setOfflineExercises((prev) =>
+      prev.map((o) =>
+        o.id === exerciseId && !o.sectionIds.includes(sectionId)
+          ? { ...o, sectionIds: [...o.sectionIds, sectionId] }
+          : o,
+      ),
+    );
+  };
+
+  const removeOfflineExerciseSection = (exerciseId: string, sectionId: string) => {
+    setOfflineExercises((prev) =>
+      prev.map((o) =>
+        o.id === exerciseId
+          ? { ...o, sectionIds: o.sectionIds.filter((id) => id !== sectionId) }
+          : o,
+      ),
+    );
+  };
+
   const updateInstitution = (settings: InstitutionSettings) => setInstitution(settings);
 
   const value = useMemo<AppStateValue>(
@@ -727,6 +851,20 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       addAppRole,
       updateAppRole,
       removeAppRole,
+      workSections,
+      addWorkSection,
+      updateWorkSection,
+      removeWorkSection,
+      exercises,
+      getExercise,
+      addExerciseSection,
+      removeExerciseSection,
+      trainerCatalog,
+      addTrainerSection,
+      removeTrainerSection,
+      offlineExercises,
+      addOfflineExerciseSection,
+      removeOfflineExerciseSection,
       institution,
       updateInstitution,
     }),
@@ -741,6 +879,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       rooms,
       roomTypes,
       appRoles,
+      workSections,
+      exercises,
+      trainerCatalog,
+      offlineExercises,
       institution,
     ],
   );

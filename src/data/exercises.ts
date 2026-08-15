@@ -1,10 +1,10 @@
 import type { Exercise } from "./types";
 
-export const exerciseBank: Exercise[] = [
+export const initialExerciseBank: Exercise[] = [
   {
     id: "ex-1",
     title: "Артикуляционная гимнастика «Часики»",
-    category: "Артикуляция",
+    sectionIds: ["ws1"],
     description:
       "Комплекс упражнений для языка и губ, развивающий подвижность артикуляционного аппарата.",
     duration: "5 мин",
@@ -12,68 +12,64 @@ export const exerciseBank: Exercise[] = [
   {
     id: "ex-2",
     title: "Дыхательная гимнастика «Свеча»",
-    category: "Дыхание",
+    sectionIds: ["ws2"],
     description: "Формирование длительного плавного речевого выдоха.",
     duration: "7 мин",
   },
   {
     id: "ex-3",
     title: "Постановка звука [Р]",
-    category: "Звукопроизношение",
+    sectionIds: ["ws3"],
     description: "Тренажёр для отработки правильного уклада языка при произнесении звука [Р].",
     duration: "10 мин",
   },
   {
     id: "ex-4",
     title: "Автоматизация звука [Ш] в слогах",
-    category: "Звукопроизношение",
+    sectionIds: ["ws3"],
     description: "Закрепление звука [Ш] в прямых и обратных слогах.",
     duration: "8 мин",
   },
   {
     id: "ex-5",
     title: "Различение оппозиционных фонем",
-    category: "Фонематический слух",
+    sectionIds: ["ws4"],
     description: "Тренажёр на различение близких по звучанию пар звуков (С–Ш, З–Ж, Р–Л).",
     duration: "6 мин",
   },
   {
     id: "ex-6",
     title: "«Назови картинку»",
-    category: "Лексика",
+    sectionIds: ["ws5", "ws13"],
     description: "Расширение активного словарного запаса по тематическим группам.",
     duration: "9 мин",
   },
   {
     id: "ex-7",
     title: "Тренажёр темпа речи",
-    category: "Связная речь",
+    sectionIds: ["ws7"],
     description: "Отработка ровного темпа речи при чтении и пересказе.",
     duration: "10 мин",
   },
   {
     id: "ex-8",
     title: "Пересказ текста",
-    category: "Связная речь",
+    sectionIds: ["ws7"],
     description: "Формирование навыка последовательного пересказа небольшого текста.",
     duration: "12 мин",
   },
   {
     id: "ex-9",
     title: "Составление рассказа по картинке",
-    category: "Связная речь",
+    sectionIds: ["ws7"],
     description: "Развитие связной монологической речи по сюжетной картинке.",
     duration: "10 мин",
   },
   {
     id: "ex-10",
     title: "Согласование слов в предложении",
-    category: "Грамматика",
+    sectionIds: ["ws6", "ws7"],
     description: "Тренажёр на правильное согласование частей речи в предложении.",
     duration: "7 мин",
   },
 ];
-
-export function getExerciseById(id: string): Exercise | undefined {
-  return exerciseBank.find((e) => e.id === id);
-}
