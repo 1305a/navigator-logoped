@@ -50,6 +50,7 @@ import {
   RefreshCw,
   Sparkles,
   User,
+  Wrench,
   XCircle,
 } from "lucide-react";
 
@@ -366,6 +367,9 @@ export default function PatientDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="program" disabled={programLocked} className="gap-1.5">
             {programLocked && <Lock className="size-3.5" />} Программа
+          </TabsTrigger>
+          <TabsTrigger value="program2" className="gap-1.5">
+            Программа2
           </TabsTrigger>
         </TabsList>
 
@@ -872,6 +876,16 @@ export default function PatientDetailPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="program2" className="mt-4">
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed bg-muted/30 p-12 text-center">
+            <Wrench className="size-8 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">Раздел находится в разработке</p>
+            <p className="max-w-sm text-xs text-muted-foreground">
+              Вторая программа коррекции будет добавлена в следующей версии сервиса.
+            </p>
+          </div>
         </TabsContent>
       </Tabs>
 
