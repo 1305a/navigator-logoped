@@ -27,6 +27,16 @@ import ParonymsTrainerPage from "@/pages/logoped/ParonymsTrainerPage";
 import ComposePhraseTrainerPage from "@/pages/logoped/ComposePhraseTrainerPage";
 import MissingLettersTrainerPage from "@/pages/logoped/MissingLettersTrainerPage";
 import PrepositionsTrainerPage from "@/pages/logoped/PrepositionsTrainerPage";
+import LetterSearchTrainerPage from "@/pages/logoped/LetterSearchTrainerPage";
+import ShowWhereTrainerPage from "@/pages/logoped/ShowWhereTrainerPage";
+import ShowSceneTrainerPage from "@/pages/logoped/ShowSceneTrainerPage";
+import WordToPictureTrainerPage from "@/pages/logoped/WordToPictureTrainerPage";
+import VerbToPictureTrainerPage from "@/pages/logoped/VerbToPictureTrainerPage";
+import ChooseByFeatureTrainerPage from "@/pages/logoped/ChooseByFeatureTrainerPage";
+import PictureAndWordTrainerPage from "@/pages/logoped/PictureAndWordTrainerPage";
+import GenderMasculineTrainerPage from "@/pages/logoped/GenderMasculineTrainerPage";
+import GenderFeminineTrainerPage from "@/pages/logoped/GenderFeminineTrainerPage";
+import GenderNeuterTrainerPage from "@/pages/logoped/GenderNeuterTrainerPage";
 import PatientsListPage from "@/pages/logoped/PatientsListPage";
 import PatientDetailPage from "@/pages/logoped/PatientDetailPage";
 import LogopedProfilePage from "@/pages/logoped/ProfilePage";
@@ -101,6 +111,16 @@ export default function App() {
         <Route path="exercise-bank/trainer/compose-phrase" element={<ComposePhraseTrainerPage />} />
         <Route path="exercise-bank/trainer/missing-letters" element={<MissingLettersTrainerPage />} />
         <Route path="exercise-bank/trainer/prepositions" element={<PrepositionsTrainerPage />} />
+        <Route path="exercise-bank/trainer/letter-search" element={<LetterSearchTrainerPage />} />
+        <Route path="exercise-bank/trainer/show-where" element={<ShowWhereTrainerPage />} />
+        <Route path="exercise-bank/trainer/show-scene" element={<ShowSceneTrainerPage />} />
+        <Route path="exercise-bank/trainer/word-to-picture" element={<WordToPictureTrainerPage />} />
+        <Route path="exercise-bank/trainer/verb-to-picture" element={<VerbToPictureTrainerPage />} />
+        <Route path="exercise-bank/trainer/choose-by-feature" element={<ChooseByFeatureTrainerPage />} />
+        <Route path="exercise-bank/trainer/picture-and-word" element={<PictureAndWordTrainerPage />} />
+        <Route path="exercise-bank/trainer/gender-masculine" element={<GenderMasculineTrainerPage />} />
+        <Route path="exercise-bank/trainer/gender-feminine" element={<GenderFeminineTrainerPage />} />
+        <Route path="exercise-bank/trainer/gender-neuter" element={<GenderNeuterTrainerPage />} />
         <Route path="patients" element={<PatientsListPage />} />
         <Route path="patients/:patientId" element={<PatientDetailPage />} />
         <Route

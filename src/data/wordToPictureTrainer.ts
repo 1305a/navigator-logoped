@@ -1,0 +1,100 @@
+export interface WordToPictureCard {
+  word: string;
+  imageUrl?: string;
+}
+
+export interface WordToPictureTask {
+  cards: WordToPictureCard[];
+}
+
+export interface WordToPictureLevel {
+  level: number;
+  tasks: WordToPictureTask[];
+}
+
+const imageModules = import.meta.glob("../assets/word-to-picture/*.png", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
+
+function resolveImage(fileName: string): string | undefined {
+  const key = Object.keys(imageModules).find((k) => k.endsWith(`/${fileName}`));
+  return key ? imageModules[key] : undefined;
+}
+
+type RawCard = { word: string; image: string };
+type RawTask = { task_number: number; cards: RawCard[] };
+type RawLevel = { level: number; words_count: number; tasks: RawTask[] };
+
+const RAW_LEVELS: RawLevel[] = [
+  {
+    level: 1,
+    words_count: 2,
+    tasks: [
+      { task_number: 1, cards: [{ word: "дом", image: "1_1.png" }, { word: "сыр", image: "1_2.png" }] },
+      { task_number: 2, cards: [{ word: "лук", image: "1_3.png" }, { word: "кот", image: "1_4.png" }] },
+      { task_number: 3, cards: [{ word: "лес", image: "1_5.png" }, { word: "мак", image: "1_6.png" }] },
+      { task_number: 4, cards: [{ word: "гусь", image: "1_7.png" }, { word: "соль", image: "1_8.png" }] },
+      { task_number: 5, cards: [{ word: "каша", image: "1_9.png" }, { word: "зубы", image: "1_10.png" }] },
+      { task_number: 6, cards: [{ word: "лыжи", image: "1_11.png" }, { word: "роза", image: "1_12.png" }] },
+      { task_number: 7, cards: [{ word: "река", image: "1_13.png" }, { word: "часы", image: "1_14.png" }] },
+      { task_number: 8, cards: [{ word: "сова", image: "1_15.png" }, { word: "луна", image: "1_16.png" }] },
+      { task_number: 9, cards: [{ word: "зонт", image: "1_17.png" }, { word: "куст", image: "1_18.png" }] },
+      { task_number: 10, cards: [{ word: "стол", image: "1_19.png" }, { word: "кран", image: "1_20.png" }] },
+      { task_number: 11, cards: [{ word: "шкаф", image: "1_21.png" }, { word: "хлеб", image: "1_22.png" }] },
+      { task_number: 12, cards: [{ word: "баран", image: "1_23.png" }, { word: "горох", image: "1_24.png" }] },
+      { task_number: 13, cards: [{ word: "диван", image: "1_25.png" }, { word: "носок", image: "1_26.png" }] },
+      { task_number: 14, cards: [{ word: "брюки", image: "1_27.png" }, { word: "книга", image: "1_28.png" }] },
+      { task_number: 15, cards: [{ word: "плита", image: "1_29.png" }, { word: "трава", image: "1_30.png" }] },
+    ],
+  },
+  {
+    level: 2,
+    words_count: 4,
+    tasks: [
+      { task_number: 1, cards: [{ word: "дом", image: "2_1.png" }, { word: "сыр", image: "2_2.png" }, { word: "лев", image: "2_3.png" }, { word: "мяч", image: "2_4.png" }] },
+      { task_number: 2, cards: [{ word: "лук", image: "2_5.png" }, { word: "кот", image: "2_6.png" }, { word: "бык", image: "2_7.png" }, { word: "сок", image: "2_8.png" }] },
+      { task_number: 3, cards: [{ word: "лес", image: "2_9.png" }, { word: "мак", image: "2_10.png" }, { word: "суп", image: "2_11.png" }, { word: "таз", image: "2_12.png" }] },
+      { task_number: 4, cards: [{ word: "гусь", image: "2_13.png" }, { word: "соль", image: "2_14.png" }, { word: "пень", image: "2_15.png" }, { word: "царь", image: "2_16.png" }] },
+      { task_number: 5, cards: [{ word: "каша", image: "2_17.png" }, { word: "зубы", image: "2_18.png" }, { word: "дача", image: "2_19.png" }, { word: "небо", image: "2_20.png" }] },
+      { task_number: 6, cards: [{ word: "лыжи", image: "2_21.png" }, { word: "роза", image: "2_22.png" }, { word: "кофе", image: "2_23.png" }, { word: "щука", image: "2_24.png" }] },
+      { task_number: 7, cards: [{ word: "река", image: "2_25.png" }, { word: "часы", image: "2_26.png" }, { word: "коза", image: "2_27.png" }, { word: "мука", image: "2_28.png" }] },
+      { task_number: 8, cards: [{ word: "сова", image: "2_29.png" }, { word: "луна", image: "2_30.png" }, { word: "кино", image: "2_31.png" }, { word: "духи", image: "2_32.png" }] },
+      { task_number: 9, cards: [{ word: "зонт", image: "2_33.png" }, { word: "куст", image: "2_34.png" }, { word: "волк", image: "2_35.png" }, { word: "шарф", image: "2_36.png" }] },
+      { task_number: 10, cards: [{ word: "стол", image: "2_37.png" }, { word: "кран", image: "2_38.png" }, { word: "гриб", image: "2_39.png" }, { word: "пруд", image: "2_40.png" }] },
+      { task_number: 11, cards: [{ word: "шкаф", image: "2_41.png" }, { word: "хлеб", image: "2_42.png" }, { word: "слон", image: "2_43.png" }, { word: "ключ", image: "2_44.png" }] },
+      { task_number: 12, cards: [{ word: "баран", image: "2_45.png" }, { word: "горох", image: "2_46.png" }, { word: "замок", image: "2_47.png" }, { word: "лимон", image: "2_48.png" }] },
+      { task_number: 13, cards: [{ word: "диван", image: "2_49.png" }, { word: "носок", image: "2_50.png" }, { word: "билет", image: "2_51.png" }, { word: "ковёр", image: "2_52.png" }] },
+      { task_number: 14, cards: [{ word: "брюки", image: "2_53.png" }, { word: "книга", image: "2_54.png" }, { word: "груша", image: "2_55.png" }, { word: "шляпа", image: "2_56.png" }] },
+      { task_number: 15, cards: [{ word: "плита", image: "2_57.png" }, { word: "трава", image: "2_58.png" }, { word: "свеча", image: "2_59.png" }, { word: "крыло", image: "2_60.png" }] },
+    ],
+  },
+  {
+    level: 3,
+    words_count: 6,
+    tasks: [
+      { task_number: 1, cards: [{ word: "дом", image: "3_1.png" }, { word: "сыр", image: "3_2.png" }, { word: "лев", image: "3_3.png" }, { word: "мяч", image: "3_4.png" }, { word: "рак", image: "3_5.png" }, { word: "щит", image: "3_6.png" }] },
+      { task_number: 2, cards: [{ word: "лук", image: "3_7.png" }, { word: "кот", image: "3_8.png" }, { word: "бык", image: "3_9.png" }, { word: "сок", image: "3_10.png" }, { word: "нож", image: "3_11.png" }, { word: "дуб", image: "3_12.png" }] },
+      { task_number: 3, cards: [{ word: "лес", image: "3_13.png" }, { word: "мак", image: "3_14.png" }, { word: "суп", image: "3_15.png" }, { word: "таз", image: "3_16.png" }, { word: "шар", image: "3_17.png" }, { word: "нос", image: "3_18.png" }] },
+      { task_number: 4, cards: [{ word: "гусь", image: "3_19.png" }, { word: "соль", image: "3_20.png" }, { word: "пень", image: "3_21.png" }, { word: "царь", image: "3_22.png" }, { word: "конь", image: "3_23.png" }, { word: "дочь", image: "3_24.png" }] },
+      { task_number: 5, cards: [{ word: "каша", image: "3_25.png" }, { word: "зубы", image: "3_26.png" }, { word: "дача", image: "3_27.png" }, { word: "небо", image: "3_28.png" }, { word: "рыба", image: "3_29.png" }, { word: "туча", image: "3_30.png" }] },
+      { task_number: 6, cards: [{ word: "лыжи", image: "3_31.png" }, { word: "роза", image: "3_32.png" }, { word: "кофе", image: "3_33.png" }, { word: "щука", image: "3_34.png" }, { word: "мясо", image: "3_35.png" }, { word: "лужа", image: "3_36.png" }] },
+      { task_number: 7, cards: [{ word: "река", image: "3_37.png" }, { word: "часы", image: "3_38.png" }, { word: "коза", image: "3_39.png" }, { word: "мука", image: "3_40.png" }, { word: "гора", image: "3_41.png" }, { word: "нога", image: "3_42.png" }] },
+      { task_number: 8, cards: [{ word: "сова", image: "3_43.png" }, { word: "луна", image: "3_44.png" }, { word: "кино", image: "3_45.png" }, { word: "духи", image: "3_46.png" }, { word: "пила", image: "3_47.png" }, { word: "зима", image: "3_48.png" }] },
+      { task_number: 9, cards: [{ word: "зонт", image: "3_49.png" }, { word: "куст", image: "3_50.png" }, { word: "волк", image: "3_51.png" }, { word: "шарф", image: "3_52.png" }, { word: "цирк", image: "3_53.png" }, { word: "кекс", image: "3_54.png" }] },
+      { task_number: 10, cards: [{ word: "стол", image: "3_55.png" }, { word: "кран", image: "3_56.png" }, { word: "гриб", image: "3_57.png" }, { word: "пруд", image: "3_58.png" }, { word: "след", image: "3_59.png" }, { word: "пляж", image: "3_60.png" }] },
+      { task_number: 11, cards: [{ word: "шкаф", image: "3_61.png" }, { word: "хлеб", image: "3_62.png" }, { word: "слон", image: "3_63.png" }, { word: "ключ", image: "3_64.png" }, { word: "блин", image: "3_65.png" }, { word: "стул", image: "3_66.png" }] },
+      { task_number: 12, cards: [{ word: "баран", image: "3_67.png" }, { word: "горох", image: "3_68.png" }, { word: "замок", image: "3_69.png" }, { word: "лимон", image: "3_70.png" }, { word: "мешок", image: "3_71.png" }, { word: "жираф", image: "3_72.png" }] },
+      { task_number: 13, cards: [{ word: "диван", image: "3_73.png" }, { word: "носок", image: "3_74.png" }, { word: "билет", image: "3_75.png" }, { word: "ковёр", image: "3_76.png" }, { word: "забор", image: "3_77.png" }, { word: "гараж", image: "3_78.png" }] },
+      { task_number: 14, cards: [{ word: "брюки", image: "3_79.png" }, { word: "книга", image: "3_80.png" }, { word: "груша", image: "3_81.png" }, { word: "шляпа", image: "3_82.png" }, { word: "слива", image: "3_83.png" }, { word: "фляга", image: "3_84.png" }] },
+      { task_number: 15, cards: [{ word: "плита", image: "3_85.png" }, { word: "трава", image: "3_86.png" }, { word: "свеча", image: "3_87.png" }, { word: "крыло", image: "3_88.png" }, { word: "труба", image: "3_89.png" }, { word: "стена", image: "3_90.png" }] },
+    ],
+  },
+];
+
+export const wordToPictureLevels: WordToPictureLevel[] = RAW_LEVELS.map((lvl) => ({
+  level: lvl.level,
+  tasks: lvl.tasks.map((t) => ({
+    cards: t.cards.map((c) => ({ word: c.word, imageUrl: resolveImage(c.image) })),
+  })),
+}));

@@ -31,6 +31,16 @@ import { paronymTasks } from "@/data/paronymsTrainer";
 import { composePhraseTasks } from "@/data/composePhraseTrainer";
 import { missingLettersTasks } from "@/data/missingLettersTrainer";
 import { prepositionLevels } from "@/data/prepositionsTrainer";
+import { letterSearchTasks } from "@/data/letterSearchTrainer";
+import { showWhereSets } from "@/data/showWhereTrainer";
+import { showSceneRows } from "@/data/showSceneTrainer";
+import { wordToPictureLevels } from "@/data/wordToPictureTrainer";
+import { verbPictureLevels } from "@/data/verbToPictureTrainer";
+import { featurePairTasks } from "@/data/chooseByFeatureTrainer";
+import { pictureWordTasks } from "@/data/pictureAndWordTrainer";
+import { genderMasculineTasks } from "@/data/genderMasculineTrainer";
+import { genderFeminineTasks } from "@/data/genderFeminineTrainer";
+import { genderNeuterTasks } from "@/data/genderNeuterTrainer";
 import { Gamepad2, Play, Timer, Wrench } from "lucide-react";
 
 const trainerCatalog = [
@@ -193,6 +203,86 @@ const trainerCatalog = [
     description: "Выберите предлог и вставьте его в пропуск в словосочетании",
     count: prepositionLevels.reduce((sum, l) => sum + l.tasks.length, 0),
     duration: "6 мин",
+  },
+  {
+    path: "trainer/letter-search",
+    category: "Чтение",
+    title: "Найдите слова на букву М среди букв",
+    description: "Выберите буквы слова и нажмите «Готово»",
+    count: letterSearchTasks.reduce((sum, t) => sum + t.rows.length, 0),
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/show-where",
+    category: "Словарный запас",
+    title: "Покажите, где…",
+    description: "Прослушайте слово и выберите соответствующую картинку",
+    count: showWhereSets.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/show-scene",
+    category: "Связная речь",
+    title: "Покажите…",
+    description: "Прослушайте фразу и выберите соответствующую сцену из двух карточек",
+    count: showSceneRows.length,
+    duration: "8 мин",
+  },
+  {
+    path: "trainer/word-to-picture",
+    category: "Словарный запас",
+    title: "Подбери слово к картинке",
+    description: "Выберите подходящее слово для каждой картинки",
+    count: wordToPictureLevels.reduce((sum, l) => sum + l.tasks.length, 0),
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/verb-to-picture",
+    category: "Грамматика",
+    title: "Подбери глагол",
+    description: "Вставьте подходящий глагол в предложение по картинке",
+    count: verbPictureLevels.reduce((sum, l) => sum + l.tasks.length, 0),
+    duration: "8 мин",
+  },
+  {
+    path: "trainer/choose-by-feature",
+    category: "Словарный запас",
+    title: "Выбери предмет по признаку",
+    description: "Прослушайте вопрос и выберите предмет по его характеристике",
+    count: featurePairTasks.length,
+    duration: "8 мин",
+  },
+  {
+    path: "trainer/picture-and-word",
+    category: "Словарный запас",
+    title: "Картинка и слово",
+    description: "Слушайте слово и отвечайте «да» или «нет», соответствует ли оно картинке",
+    count: pictureWordTasks.length,
+    duration: "8 мин",
+  },
+  {
+    path: "trainer/gender-masculine",
+    category: "Грамматика",
+    title: "Выбор предмета МУЖ РОД",
+    description: "Нажмите «Послушайте» и выберите подходящую картинку",
+    count: genderMasculineTasks.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/gender-feminine",
+    category: "Грамматика",
+    title: "Выбор предмета ЖЕН РОД",
+    description: "Нажмите «Послушайте» и выберите подходящую картинку",
+    count: genderFeminineTasks.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/gender-neuter",
+    category: "Грамматика",
+    title: "Выбор предмета СР РОД",
+    description: "Нажмите «Послушайте» и выберите подходящую картинку",
+    count: genderNeuterTasks.length,
+    duration: "5 мин",
   },
 ];
 
