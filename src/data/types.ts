@@ -115,6 +115,30 @@ export interface PatientInfo {
 
 export type DiagnosisStatus = "pending" | "approved" | "rejected";
 
+export interface Program2Exercise {
+  id: string;
+  exerciseId: string;
+  done: boolean;
+  autoGraded: boolean;
+  ratings: { accuracy: number | null; independence: number | null; pace: number | null };
+}
+
+export interface Program2Section {
+  id: string;
+  sectionId: string;
+  exercises: Program2Exercise[];
+}
+
+export interface Program2Session {
+  id: string;
+  location: "home" | "room" | null;
+  roomId: string | null;
+  date: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  sections: Program2Section[];
+}
+
 export interface Patient {
   id: string;
   fullName: string;
@@ -131,6 +155,9 @@ export interface Patient {
   programCreated: boolean;
   programSummary: string;
   sessions: TherapySession[];
+  program2AutoBuilt: boolean;
+  program2Auto: Program2Session[];
+  program2Work: Program2Session[];
 }
 
 export interface Appointment {

@@ -10,6 +10,9 @@ import type {
   Patient,
   PatientInfo,
   Position,
+  Program2Exercise,
+  Program2Section,
+  Program2Session,
   Room,
   RoomType,
   SpeechCard,
@@ -37,8 +40,9 @@ import { initialExerciseBank } from "@/data/exercises";
 import { initialTrainerCatalog } from "@/data/trainers";
 import { initialOfflineExercises } from "@/data/offlineExercises";
 import { buildSessions, renumberSessions } from "@/lib/therapy";
+import { buildAutoProgram2, sortProgram2Sessions } from "@/lib/program2";
 
-type SessionScheduleDetails =
+export type SessionScheduleDetails =
   | { location: "home" }
   | { location: "room"; roomId: string; date: string; startTime: string; endTime: string };
 
@@ -90,6 +94,66 @@ interface AppStateValue {
   ) => void;
   removeTherapySession: (patientId: string, sessionId: string) => void;
   moveTherapySession: (patientId: string, sessionId: string, direction: "up" | "down") => void;
+
+  buildProgram2Auto: (patientId: string) => void;
+  fillProgram2WorkFromAuto: (patientId: string) => void;
+  clearProgram2Work: (patientId: string) => void;
+  addProgram2Session: (patientId: string, details: SessionScheduleDetails) => void;
+  updateProgram2Session: (
+    patientId: string,
+    sessionId: string,
+    details: SessionScheduleDetails,
+  ) => void;
+  removeProgram2Session: (patientId: string, sessionId: string) => void;
+  addProgram2Section: (patientId: string, sessionId: string, workSectionId: string) => void;
+  removeProgram2Section: (patientId: string, sessionId: string, sectionInstanceId: string) => void;
+  reorderProgram2Sections: (
+    patientId: string,
+    sessionId: string,
+    orderedSectionInstanceIds: string[],
+  ) => void;
+  addProgram2Exercise: (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    exerciseId: string,
+  ) => void;
+  removeProgram2Exercise: (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    exerciseInstanceId: string,
+  ) => void;
+  reorderProgram2Exercises: (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    orderedExerciseInstanceIds: string[],
+  ) => void;
+  setProgram2ExerciseRating: (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    exerciseInstanceId: string,
+    ratings: Program2Exercise["ratings"],
+    autoGraded: boolean,
+  ) => void;
+  copyAutoSessionToWork: (patientId: string, autoSessionId: string) => void;
+  copyAutoSectionToWork: (
+    patientId: string,
+    autoSessionId: string,
+    autoSectionInstanceId: string,
+    targetSessionId: string,
+  ) => void;
+  copyAutoExerciseToWork: (
+    patientId: string,
+    autoSessionId: string,
+    autoSectionInstanceId: string,
+    autoExerciseInstanceId: string,
+    targetSessionId: string,
+    targetSectionInstanceId: string,
+  ) => void;
+
   addPatient: (patient: Patient) => void;
   updatePatientInfo: (patientId: string, info: PatientInfo) => void;
 
@@ -573,6 +637,407 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const buildProgram2Auto = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2AutoBuilt: true,
+              program2Auto: buildAutoProgram2(patientId, exercises, workSections, rooms),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const fillProgram2WorkFromAuto = (patientId: string) => {
+    const patient = patients.find((p) => p.id === patientId);
+    if (!patient) return;
+    const now = Date.now();
+    const cloned: Program2Session[] = patient.program2Auto.map((session, si) => ({
+      ...session,
+      id: `p2w-${now}-${si}`,
+      sections: session.sections.map((section, sei) => ({
+        ...section,
+        id: `ps-${now}-${si}-${sei}`,
+        exercises: section.exercises.map((ex, exi) => ({
+          ...ex,
+          id: `pe-${now}-${si}-${sei}-${exi}`,
+        })),
+      })),
+    }));
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId ? { ...p, program2Work: sortProgram2Sessions(cloned) } : p,
+      ),
+    );
+  };
+
+  const clearProgram2Work = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) => (p.id === patientId ? { ...p, program2Work: [] } : p)),
+    );
+  };
+
+  const addProgram2Session = (patientId: string, details: SessionScheduleDetails) => {
+    const newSession: Program2Session = {
+      id: `p2w-${Date.now()}`,
+      location: details.location,
+      roomId: details.location === "room" ? details.roomId : null,
+      date: details.location === "room" ? details.date : null,
+      startTime: details.location === "room" ? details.startTime : null,
+      endTime: details.location === "room" ? details.endTime : null,
+      sections: [],
+    };
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, program2Work: sortProgram2Sessions([...p.program2Work, newSession]) }
+          : p,
+      ),
+    );
+  };
+
+  const updateProgram2Session = (
+    patientId: string,
+    sessionId: string,
+    details: SessionScheduleDetails,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: sortProgram2Sessions(
+                p.program2Work.map((s) =>
+                  s.id === sessionId
+                    ? {
+                        ...s,
+                        location: details.location,
+                        roomId: details.location === "room" ? details.roomId : null,
+                        date: details.location === "room" ? details.date : null,
+                        startTime: details.location === "room" ? details.startTime : null,
+                        endTime: details.location === "room" ? details.endTime : null,
+                      }
+                    : s,
+                ),
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const removeProgram2Session = (patientId: string, sessionId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, program2Work: p.program2Work.filter((s) => s.id !== sessionId) }
+          : p,
+      ),
+    );
+  };
+
+  const addProgram2Section = (patientId: string, sessionId: string, workSectionId: string) => {
+    const newSection: Program2Section = {
+      id: `ps-${Date.now()}`,
+      sectionId: workSectionId,
+      exercises: [],
+    };
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === sessionId ? { ...s, sections: [...s.sections, newSection] } : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const removeProgram2Section = (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === sessionId
+                  ? { ...s, sections: s.sections.filter((sec) => sec.id !== sectionInstanceId) }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const reorderProgram2Sections = (
+    patientId: string,
+    sessionId: string,
+    orderedSectionInstanceIds: string[],
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      sections: orderedSectionInstanceIds
+                        .map((id) => s.sections.find((sec) => sec.id === id))
+                        .filter((sec): sec is Program2Section => !!sec),
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const addProgram2Exercise = (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    exerciseId: string,
+  ) => {
+    const newExercise: Program2Exercise = {
+      id: `pe-${Date.now()}`,
+      exerciseId,
+      done: false,
+      autoGraded: false,
+      ratings: { accuracy: null, independence: null, pace: null },
+    };
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      sections: s.sections.map((sec) =>
+                        sec.id === sectionInstanceId
+                          ? { ...sec, exercises: [...sec.exercises, newExercise] }
+                          : sec,
+                      ),
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const removeProgram2Exercise = (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    exerciseInstanceId: string,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      sections: s.sections.map((sec) =>
+                        sec.id === sectionInstanceId
+                          ? {
+                              ...sec,
+                              exercises: sec.exercises.filter(
+                                (ex) => ex.id !== exerciseInstanceId,
+                              ),
+                            }
+                          : sec,
+                      ),
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const reorderProgram2Exercises = (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    orderedExerciseInstanceIds: string[],
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      sections: s.sections.map((sec) =>
+                        sec.id === sectionInstanceId
+                          ? {
+                              ...sec,
+                              exercises: orderedExerciseInstanceIds
+                                .map((id) => sec.exercises.find((ex) => ex.id === id))
+                                .filter((ex): ex is Program2Exercise => !!ex),
+                            }
+                          : sec,
+                      ),
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const setProgram2ExerciseRating = (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    exerciseInstanceId: string,
+    ratings: Program2Exercise["ratings"],
+    autoGraded: boolean,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      sections: s.sections.map((sec) =>
+                        sec.id === sectionInstanceId
+                          ? {
+                              ...sec,
+                              exercises: sec.exercises.map((ex) =>
+                                ex.id === exerciseInstanceId
+                                  ? { ...ex, ratings, autoGraded, done: true }
+                                  : ex,
+                              ),
+                            }
+                          : sec,
+                      ),
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const copyAutoSessionToWork = (patientId: string, autoSessionId: string) => {
+    const patient = patients.find((p) => p.id === patientId);
+    const autoSession = patient?.program2Auto.find((s) => s.id === autoSessionId);
+    if (!patient || !autoSession) return;
+    const now = Date.now();
+    const cloned: Program2Session = {
+      ...autoSession,
+      id: `p2w-${now}`,
+      sections: autoSession.sections.map((sec, si) => ({
+        ...sec,
+        id: `ps-${now}-${si}`,
+        exercises: sec.exercises.map((ex, exi) => ({ ...ex, id: `pe-${now}-${si}-${exi}` })),
+      })),
+    };
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, program2Work: sortProgram2Sessions([...p.program2Work, cloned]) }
+          : p,
+      ),
+    );
+  };
+
+  const copyAutoSectionToWork = (
+    patientId: string,
+    autoSessionId: string,
+    autoSectionInstanceId: string,
+    targetSessionId: string,
+  ) => {
+    const patient = patients.find((p) => p.id === patientId);
+    const autoSession = patient?.program2Auto.find((s) => s.id === autoSessionId);
+    const autoSection = autoSession?.sections.find((sec) => sec.id === autoSectionInstanceId);
+    if (!patient || !autoSection) return;
+    const now = Date.now();
+    const cloned: Program2Section = {
+      ...autoSection,
+      id: `ps-${now}`,
+      exercises: autoSection.exercises.map((ex, exi) => ({ ...ex, id: `pe-${now}-${exi}` })),
+    };
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === targetSessionId ? { ...s, sections: [...s.sections, cloned] } : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const copyAutoExerciseToWork = (
+    patientId: string,
+    autoSessionId: string,
+    autoSectionInstanceId: string,
+    autoExerciseInstanceId: string,
+    targetSessionId: string,
+    targetSectionInstanceId: string,
+  ) => {
+    const patient = patients.find((p) => p.id === patientId);
+    const autoSession = patient?.program2Auto.find((s) => s.id === autoSessionId);
+    const autoSection = autoSession?.sections.find((sec) => sec.id === autoSectionInstanceId);
+    const autoExercise = autoSection?.exercises.find((ex) => ex.id === autoExerciseInstanceId);
+    if (!patient || !autoExercise) return;
+    const cloned: Program2Exercise = { ...autoExercise, id: `pe-${Date.now()}` };
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === targetSessionId
+                  ? {
+                      ...s,
+                      sections: s.sections.map((sec) =>
+                        sec.id === targetSectionInstanceId
+                          ? { ...sec, exercises: [...sec.exercises, cloned] }
+                          : sec,
+                      ),
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
   const addPatient = (patient: Patient) => setPatients((prev) => [...prev, patient]);
 
   const updatePatientInfo = (patientId: string, info: PatientInfo) => {
@@ -821,6 +1286,22 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       updateSessionSchedule,
       removeTherapySession,
       moveTherapySession,
+      buildProgram2Auto,
+      fillProgram2WorkFromAuto,
+      clearProgram2Work,
+      addProgram2Session,
+      updateProgram2Session,
+      removeProgram2Session,
+      addProgram2Section,
+      removeProgram2Section,
+      reorderProgram2Sections,
+      addProgram2Exercise,
+      removeProgram2Exercise,
+      reorderProgram2Exercises,
+      setProgram2ExerciseRating,
+      copyAutoSessionToWork,
+      copyAutoSectionToWork,
+      copyAutoExerciseToWork,
       addPatient,
       updatePatientInfo,
       appointments,

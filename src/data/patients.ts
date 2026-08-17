@@ -58,6 +58,9 @@ export const initialPatients: Patient[] = [
     programSummary:
       "Индивидуальная программа коррекции моторной афазии. Периодичность — 3 раза в неделю по 30–40 минут. Основные направления: восстановление номинативной функции речи, стимуляция спонтанного высказывания, работа над темпом и плавностью речи.",
     sessions: withProgress("p1", ["ex-6", "ex-7", "ex-8", "ex-9"], 5, [4, 5]),
+    program2AutoBuilt: false,
+    program2Auto: [],
+    program2Work: [],
   },
   {
     id: "p2",
@@ -97,6 +100,9 @@ export const initialPatients: Patient[] = [
     programSummary:
       "Программа стимуляции речевого развития. Периодичность — 2 раза в неделю по 25 минут в игровой форме. Основные направления: расширение пассивного и активного словаря, формирование фразовой речи, развитие фонематического слуха.",
     sessions: withProgress("p2", ["ex-6", "ex-5", "ex-1"], 6, [5, 4]),
+    program2AutoBuilt: false,
+    program2Auto: [],
+    program2Work: [],
   },
   {
     id: "p3",
@@ -136,6 +142,9 @@ export const initialPatients: Patient[] = [
     programSummary:
       "Программа коррекции заикания. Периодичность — 2 раза в неделю по 30 минут. Основные направления: работа над темпом и плавностью речи, дыхательные упражнения, снижение речевой тревожности.",
     sessions: withProgress("p3", ["ex-2", "ex-7"], 4, [3]),
+    program2AutoBuilt: false,
+    program2Auto: [],
+    program2Work: [],
   },
   {
     id: "p4",
@@ -175,6 +184,9 @@ export const initialPatients: Patient[] = [
     programSummary:
       "Программа коррекции стёртой дизартрии. Периодичность — 3 раза в неделю по 30 минут. Основные направления: артикуляционная гимнастика, автоматизация звуков, развитие мелкой моторики.",
     sessions: withProgress("p4", ["ex-1", "ex-4", "ex-3"], 5, [4, 4, 5]),
+    program2AutoBuilt: false,
+    program2Auto: [],
+    program2Work: [],
   },
   {
     id: "p5",
@@ -214,6 +226,9 @@ export const initialPatients: Patient[] = [
     programSummary:
       "Программа восстановления при сенсомоторной афазии. Периодичность — 3 раза в неделю по 30 минут. Основные направления: развитие понимания речи, стимуляция называния предметов, работа с короткими диалогами.",
     sessions: withProgress("p5", ["ex-6", "ex-5"], 4, [3]),
+    program2AutoBuilt: false,
+    program2Auto: [],
+    program2Work: [],
   },
   {
     id: "p6",
@@ -253,6 +268,9 @@ export const initialPatients: Patient[] = [
     programSummary:
       "Программа коррекции ОНР III уровня. Периодичность — 3 раза в неделю по 30 минут. Основные направления: расширение словаря, формирование грамматического строя речи, развитие связной речи.",
     sessions: withProgress("p6", ["ex-10", "ex-9", "ex-6"], 5, [5, 5, 4, 5, 5]),
+    program2AutoBuilt: false,
+    program2Auto: [],
+    program2Work: [],
   },
   {
     id: "p7",
@@ -280,6 +298,9 @@ export const initialPatients: Patient[] = [
     programCreated: false,
     programSummary: "",
     sessions: [],
+    program2AutoBuilt: false,
+    program2Auto: [],
+    program2Work: [],
   },
   {
     id: "p8",
@@ -319,5 +340,8 @@ export const initialPatients: Patient[] = [
     programSummary:
       "Долгосрочная программа коррекции тяжёлой дизартрии после ЧМТ. Периодичность — 3 раза в неделю по 40 минут. Основные направления: артикуляционная гимнастика, автоматизация звуков в связной речи, развитие темпо-ритмической организации речи, закрепление достигнутых результатов.",
     sessions: withProgress("p8", ["ex-10", "ex-9", "ex-6", "ex-5"], 8, [4, 5, 4, 5, 5, 4]),
+    program2AutoBuilt: false,
+    program2Auto: [],
+    program2Work: [],
   },
 ];

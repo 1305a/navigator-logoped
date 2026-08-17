@@ -39,6 +39,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar } from "@/components/ui/calendar";
 import { SessionRoadmap } from "@/components/app/SessionRoadmap";
+import { Program2Tab } from "@/components/app/program2/Program2Tab";
 import { generateTimeOptions, rangesOverlap, timeToMinutes } from "@/lib/schedule";
 import {
   ArrowLeft,
@@ -50,7 +51,6 @@ import {
   RefreshCw,
   Sparkles,
   User,
-  Wrench,
   XCircle,
 } from "lucide-react";
 
@@ -879,13 +879,7 @@ export default function PatientDetailPage() {
         </TabsContent>
 
         <TabsContent value="program2" className="mt-4">
-          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed bg-muted/30 p-12 text-center">
-            <Wrench className="size-8 text-muted-foreground" />
-            <p className="text-sm font-medium text-foreground">Раздел находится в разработке</p>
-            <p className="max-w-sm text-xs text-muted-foreground">
-              Вторая программа коррекции будет добавлена в следующей версии сервиса.
-            </p>
-          </div>
+          <Program2Tab patientId={patient.id} />
         </TabsContent>
       </Tabs>
 

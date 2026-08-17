@@ -65,6 +65,9 @@ export default function AddPatientPage({ backTo }: { backTo: string }) {
       programCreated: false,
       programSummary: "",
       sessions: [],
+      program2AutoBuilt: false,
+      program2Auto: [],
+      program2Work: [],
     });
     toast.success("Пациент добавлен");
     navigate(backTo);
