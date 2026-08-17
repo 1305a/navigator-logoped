@@ -37,6 +37,16 @@ import PictureAndWordTrainerPage from "@/pages/logoped/PictureAndWordTrainerPage
 import GenderMasculineTrainerPage from "@/pages/logoped/GenderMasculineTrainerPage";
 import GenderFeminineTrainerPage from "@/pages/logoped/GenderFeminineTrainerPage";
 import GenderNeuterTrainerPage from "@/pages/logoped/GenderNeuterTrainerPage";
+import PluralObjectsTrainerPage from "@/pages/logoped/PluralObjectsTrainerPage";
+import CategoryObjectsTrainerPage from "@/pages/logoped/CategoryObjectsTrainerPage";
+import VerbActionsTrainerPage from "@/pages/logoped/VerbActionsTrainerPage";
+import AttributeMatchTrainerPage from "@/pages/logoped/AttributeMatchTrainerPage";
+import VerbNounPhrasesTrainerPage from "@/pages/logoped/VerbNounPhrasesTrainerPage";
+import PrepositionRoundsTrainerPage from "@/pages/logoped/PrepositionRoundsTrainerPage";
+import PrepositionVerbNounTrainerPage from "@/pages/logoped/PrepositionVerbNounTrainerPage";
+import PrepositionNounNounTrainerPage from "@/pages/logoped/PrepositionNounNounTrainerPage";
+import OddOneOutTrainerPage from "@/pages/logoped/OddOneOutTrainerPage";
+import EndingsMatchTrainerPage from "@/pages/logoped/EndingsMatchTrainerPage";
 import PatientsListPage from "@/pages/logoped/PatientsListPage";
 import PatientDetailPage from "@/pages/logoped/PatientDetailPage";
 import LogopedProfilePage from "@/pages/logoped/ProfilePage";
@@ -123,6 +133,22 @@ export default function App() {
         <Route path="exercise-bank/trainer/gender-masculine" element={<GenderMasculineTrainerPage />} />
         <Route path="exercise-bank/trainer/gender-feminine" element={<GenderFeminineTrainerPage />} />
         <Route path="exercise-bank/trainer/gender-neuter" element={<GenderNeuterTrainerPage />} />
+        <Route path="exercise-bank/trainer/plural-objects" element={<PluralObjectsTrainerPage />} />
+        <Route path="exercise-bank/trainer/category-objects" element={<CategoryObjectsTrainerPage />} />
+        <Route path="exercise-bank/trainer/verb-actions" element={<VerbActionsTrainerPage />} />
+        <Route path="exercise-bank/trainer/attribute-match" element={<AttributeMatchTrainerPage />} />
+        <Route path="exercise-bank/trainer/verb-noun-phrases" element={<VerbNounPhrasesTrainerPage />} />
+        <Route path="exercise-bank/trainer/preposition-rounds" element={<PrepositionRoundsTrainerPage />} />
+        <Route
+          path="exercise-bank/trainer/preposition-verb-noun"
+          element={<PrepositionVerbNounTrainerPage />}
+        />
+        <Route
+          path="exercise-bank/trainer/preposition-noun-noun"
+          element={<PrepositionNounNounTrainerPage />}
+        />
+        <Route path="exercise-bank/trainer/odd-one-out" element={<OddOneOutTrainerPage />} />
+        <Route path="exercise-bank/trainer/endings-match" element={<EndingsMatchTrainerPage />} />
         <Route path="patients" element={<PatientsListPage />} />
         <Route path="patients/:patientId" element={<PatientDetailPage />} />
         <Route

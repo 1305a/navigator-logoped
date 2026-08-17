@@ -29,6 +29,16 @@ import { pictureWordTasks } from "./pictureAndWordTrainer";
 import { genderMasculineTasks } from "./genderMasculineTrainer";
 import { genderFeminineTasks } from "./genderFeminineTrainer";
 import { genderNeuterTasks } from "./genderNeuterTrainer";
+import { pluralObjectsTasks } from "./pluralObjectsTrainer";
+import { categoryObjectLevels } from "./categoryObjectsTrainer";
+import { verbActionTasks } from "./verbActionsTrainer";
+import { attributeTasks } from "./attributeMatchTrainer";
+import { verbNounTasks } from "./verbNounPhrasesTrainer";
+import { prepositionRoundTasks } from "./prepositionRoundsTrainer";
+import { prepositionImageTasks } from "./prepositionVerbNounTrainer";
+import { prepositionNounImageTasks } from "./prepositionNounNounTrainer";
+import { oddOneOutTasks } from "./oddOneOutTrainer";
+import { endingTasks } from "./endingsMatchTrainer";
 
 export const initialTrainerCatalog: TrainerCatalogEntry[] = [
   {
@@ -270,5 +280,85 @@ export const initialTrainerCatalog: TrainerCatalogEntry[] = [
     description: "Нажмите «Послушайте» и выберите подходящую картинку",
     count: genderNeuterTasks.length,
     duration: "5 мин",
+  },
+  {
+    path: "trainer/plural-objects",
+    sectionIds: ["ws6"],
+    title: "Выбор предмета МН ЧИСЛО",
+    description: "Нажмите «Послушайте» и выберите подходящую картинку",
+    count: pluralObjectsTasks.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/category-objects",
+    sectionIds: ["ws13"],
+    title: "Выбор предмета Категории 1-5",
+    description: "Пять уровней по темам; нажмите «Послушайте» и выберите картинку",
+    count: categoryObjectLevels.reduce((sum, l) => sum + l.tasks.length, 0),
+    duration: "15 мин",
+  },
+  {
+    path: "trainer/verb-actions",
+    sectionIds: ["ws6"],
+    title: "Действия",
+    description: "Две картинки: послушайте слово и выберите действие",
+    count: verbActionTasks.length,
+    duration: "8 мин",
+  },
+  {
+    path: "trainer/attribute-match",
+    sectionIds: ["ws8"],
+    title: "Понимание речи Начало начал ПРИЗНАКИ",
+    description: "Прослушайте слово и признак, ответьте «да/нет»",
+    count: attributeTasks.length,
+    duration: "6 мин",
+  },
+  {
+    path: "trainer/verb-noun-phrases",
+    sectionIds: ["ws10"],
+    title: "Словосочетания глагол существительное",
+    description: "Послушайте словосочетание и выберите подходящую картинку",
+    count: verbNounTasks.length,
+    duration: "5 мин",
+  },
+  {
+    path: "trainer/preposition-rounds",
+    sectionIds: ["ws6"],
+    title: "Расставить предлоги",
+    description: "Выберите предлог и вставьте его в пропуск во фразе",
+    count: prepositionRoundTasks.reduce((sum, t) => sum + t.cards.reduce((s, c) => s + c.phrases.length, 0), 0),
+    duration: "8 мин",
+  },
+  {
+    path: "trainer/preposition-verb-noun",
+    sectionIds: ["ws6"],
+    title: "Расставьте предлоги (глагол + существительное)",
+    description: "Выберите предлог и вставьте его в пропуск во фразе с картинкой",
+    count: prepositionImageTasks.reduce((sum, t) => sum + t.phrases.length, 0),
+    duration: "10 мин",
+  },
+  {
+    path: "trainer/preposition-noun-noun",
+    sectionIds: ["ws6"],
+    title: "Расставьте предлоги (существительное + существительное)",
+    description: "Выберите предлог и вставьте его в пропуск во фразе с картинкой",
+    count: prepositionNounImageTasks.reduce((sum, t) => sum + t.phrases.length, 0),
+    duration: "10 мин",
+  },
+  {
+    path: "trainer/odd-one-out",
+    sectionIds: ["ws13"],
+    title: "4 лишний",
+    description: "Выберите лишнее слово среди четырёх",
+    count: oddOneOutTasks.length,
+    duration: "10 мин",
+  },
+  {
+    path: "trainer/endings-match",
+    sectionIds: ["ws8"],
+    title: "Расставьте окончания",
+    description: "Подберите окончание к слову и подставьте его в словосочетание",
+    count: endingTasks.length,
+    duration: "8 мин",
   },
 ];
