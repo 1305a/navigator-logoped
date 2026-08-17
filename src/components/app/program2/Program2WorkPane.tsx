@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Exercise, Program2Exercise, Program2Section, Program2Session, Room, WorkSection } from "@/data/types";
-import type { Program2ScheduleDetails } from "@/lib/program2";
+import type { Exercise, Program2Exercise, Program2Section, Program2Session, WorkSection } from "@/data/types";
 import {
   Card,
   CardAction,
@@ -24,8 +23,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Program2SessionModal } from "@/components/app/program2/Program2SessionModal";
-import { Program2ExerciseModal } from "@/components/app/program2/Program2ExerciseModal";
 import { Program2ItemPicker } from "@/components/app/program2/Program2ItemPicker";
 import { cn } from "@/lib/utils";
 import {
@@ -40,8 +37,7 @@ import {
 interface WorkPaneCallbacks {
   fillFromAuto: () => void;
   clearWork: () => void;
-  addSession: (details: Program2ScheduleDetails) => void;
-  updateSession: (sessionId: string, details: Program2ScheduleDetails) => void;
+  addSession: () => void;
   removeSession: (sessionId: string) => void;
   addSection: (sessionId: string, workSectionId: string) => void;
   removeSection: (sessionId: string, sectionInstanceId: string) => void;
@@ -49,13 +45,6 @@ interface WorkPaneCallbacks {
   addExercise: (sessionId: string, sectionInstanceId: string, exerciseId: string) => void;
   removeExercise: (sessionId: string, sectionInstanceId: string, exerciseInstanceId: string) => void;
   reorderExercises: (sessionId: string, sectionInstanceId: string, orderedIds: string[]) => void;
-  rateExercise: (
-    sessionId: string,
-    sectionInstanceId: string,
-    exerciseInstanceId: string,
-    ratings: Program2Exercise["ratings"],
-    autoGraded: boolean,
-  ) => void;
 }
 
 function WorkExerciseRow({
@@ -65,7 +54,6 @@ function WorkExerciseRow({
   exercise,
   index,
   total,
-  onOpen,
   onMove,
   onRemove,
 }: {
@@ -75,7 +63,6 @@ function WorkExerciseRow({
   exercise: Exercise | undefined;
   index: number;
   total: number;
-  onOpen: () => void;
   onMove: (direction: "up" | "down") => void;
   onRemove: () => void;
 }) {
@@ -92,10 +79,8 @@ function WorkExerciseRow({
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={cn("flex items-center gap-1.5", isDragging && "opacity-50")}
     >
-      <button
-        type="button"
-        onClick={onOpen}
-        className="flex flex-1 cursor-grab items-center gap-2 rounded-md border bg-card px-2.5 py-1.5 text-left text-sm text-foreground hover:bg-accent/40"
+      <div
+        className="flex flex-1 cursor-grab items-center gap-2 rounded-md border bg-card px-2.5 py-1.5 text-sm text-foreground"
         {...listeners}
         {...attributes}
       >
@@ -105,7 +90,7 @@ function WorkExerciseRow({
             выполнено
           </Badge>
         )}
-      </button>
+      </div>
       <Button size="icon-sm" variant="ghost" disabled={index === 0} onClick={() => onMove("up")}>
         <ChevronUp className="size-3.5" />
       </Button>
@@ -133,7 +118,6 @@ function WorkSectionRow({
   total,
   onMove,
   onRemove,
-  onOpenExercise,
   onMoveExercise,
   onRemoveExercise,
   onAddExerciseClick,
@@ -146,7 +130,6 @@ function WorkSectionRow({
   total: number;
   onMove: (direction: "up" | "down") => void;
   onRemove: () => void;
-  onOpenExercise: (exerciseInstanceId: string) => void;
   onMoveExercise: (exerciseInstanceId: string, direction: "up" | "down") => void;
   onRemoveExercise: (exerciseInstanceId: string) => void;
   onAddExerciseClick: () => void;
@@ -196,7 +179,6 @@ function WorkSectionRow({
                 exercise={exercises.find((e) => e.id === entry.exerciseId)}
                 index={exIndex}
                 total={section.exercises.length}
-                onOpen={() => onOpenExercise(entry.id)}
                 onMove={(direction) => onMoveExercise(entry.id, direction)}
                 onRemove={() => onRemoveExercise(entry.id)}
               />
@@ -219,12 +201,9 @@ function WorkSectionRow({
 function WorkSessionRow({
   session,
   index,
-  rooms,
   workSections,
   exercises,
-  onEdit,
   onRemove,
-  onOpenExercise,
   onMoveSection,
   onRemoveSection,
   onMoveExercise,
@@ -234,12 +213,9 @@ function WorkSessionRow({
 }: {
   session: Program2Session;
   index: number;
-  rooms: Room[];
   workSections: WorkSection[];
   exercises: Exercise[];
-  onEdit: () => void;
   onRemove: () => void;
-  onOpenExercise: (sectionId: string, exerciseInstanceId: string) => void;
   onMoveSection: (sectionId: string, direction: "up" | "down") => void;
   onRemoveSection: (sectionId: string) => void;
   onMoveExercise: (sectionId: string, exerciseInstanceId: string, direction: "up" | "down") => void;
@@ -252,7 +228,6 @@ function WorkSessionRow({
     data: { type: "work-session", sessionId: session.id },
   });
   const [collapsed, setCollapsed] = useState(false);
-  const room = rooms.find((r) => r.id === session.roomId);
 
   return (
     <div
@@ -266,19 +241,9 @@ function WorkSessionRow({
         <Button type="button" size="icon-sm" variant="ghost" onClick={() => setCollapsed((v) => !v)}>
           {collapsed ? <Plus className="size-3.5" /> : <Minus className="size-3.5" />}
         </Button>
-        <button
-          type="button"
-          onClick={onEdit}
-          className="flex-1 rounded-md px-1.5 py-0.5 text-left hover:bg-accent/30"
-        >
+        <div className="flex-1 px-1.5 py-0.5">
           <p className="text-sm font-medium text-foreground">Занятие {index + 1}</p>
-          <p className="text-xs text-muted-foreground">
-            {session.date ?? "Дата не указана"}
-            {session.startTime && session.endTime ? ` · ${session.startTime}–${session.endTime}` : ""}
-            {" · "}
-            {session.location === "room" ? `Кабинет: ${room?.name ?? "—"}` : "Дома"}
-          </p>
-        </button>
+        </div>
         <Button size="icon-sm" variant="ghost" onClick={onRemove}>
           <Trash2 className="size-3.5" />
         </Button>
@@ -297,7 +262,6 @@ function WorkSessionRow({
                 total={session.sections.length}
                 onMove={(direction) => onMoveSection(section.id, direction)}
                 onRemove={() => onRemoveSection(section.id)}
-                onOpenExercise={(exerciseInstanceId) => onOpenExercise(section.id, exerciseInstanceId)}
                 onMoveExercise={(exerciseInstanceId, direction) =>
                   onMoveExercise(section.id, exerciseInstanceId, direction)
                 }
@@ -317,13 +281,11 @@ function WorkSessionRow({
 
 export function Program2WorkPane({
   sessions,
-  rooms,
   exercises,
   workSections,
   callbacks,
 }: {
   sessions: Program2Session[];
-  rooms: Room[];
   exercises: Exercise[];
   workSections: WorkSection[];
   callbacks: WorkPaneCallbacks;
@@ -333,21 +295,11 @@ export function Program2WorkPane({
     data: { type: "work-root" },
   });
 
-  const [sessionModal, setSessionModal] = useState<{ session: Program2Session | null } | null>(
-    null,
-  );
   const [sectionPicker, setSectionPicker] = useState<{ sessionId: string } | null>(null);
   const [exercisePicker, setExercisePicker] = useState<{
     sessionId: string;
     sectionId: string;
     workSectionId: string;
-  } | null>(null);
-  const [exerciseModal, setExerciseModal] = useState<{
-    sessionId: string;
-    sectionId: string;
-    entry: Program2Exercise;
-    exercise: Exercise | undefined;
-    location: "home" | "room" | null;
   } | null>(null);
   const [confirm, setConfirm] = useState<{ message: string; action: () => void } | null>(null);
 
@@ -358,19 +310,6 @@ export function Program2WorkPane({
     const next = [...list];
     [next[index], next[target]] = [next[target], next[index]];
     return next.map((i) => i.id);
-  }
-
-  function openExerciseModal(session: Program2Session, sectionId: string, exerciseInstanceId: string) {
-    const section = session.sections.find((s) => s.id === sectionId);
-    const entry = section?.exercises.find((e) => e.id === exerciseInstanceId);
-    if (!entry) return;
-    setExerciseModal({
-      sessionId: session.id,
-      sectionId,
-      entry,
-      exercise: exercises.find((e) => e.id === entry.exerciseId),
-      location: session.location,
-    });
   }
 
   return (
@@ -385,12 +324,12 @@ export function Program2WorkPane({
             className="gap-1.5"
             onClick={() =>
               setConfirm({
-                message: "Очистить рабочую программу и заполнить автопрограммой?",
+                message: "Очистить рабочую программу и заполнить рекомендуемой программой?",
                 action: callbacks.fillFromAuto,
               })
             }
           >
-            Заполнить из автопрограммы
+            Заполнить из рекомендуемой программы
           </Button>
           <Button
             size="sm"
@@ -418,7 +357,7 @@ export function Program2WorkPane({
           {sessions.length === 0 && (
             <p className="text-sm text-muted-foreground">
               В рабочей программе пока нет занятий. Добавьте занятие вручную или перетащите его из
-              автоматической программы.
+              рекомендуемой программы.
             </p>
           )}
           {sessions.map((session, index) => (
@@ -426,18 +365,13 @@ export function Program2WorkPane({
               key={session.id}
               session={session}
               index={index}
-              rooms={rooms}
               workSections={workSections}
               exercises={exercises}
-              onEdit={() => setSessionModal({ session })}
               onRemove={() =>
                 setConfirm({
                   message: `Удалить занятие ${index + 1}?`,
                   action: () => callbacks.removeSession(session.id),
                 })
-              }
-              onOpenExercise={(sectionId, exerciseInstanceId) =>
-                openExerciseModal(session, sectionId, exerciseInstanceId)
               }
               onMoveSection={(sectionId, direction) =>
                 callbacks.reorderSections(session.id, reorder(session.sections, sectionId, direction))
@@ -476,29 +410,10 @@ export function Program2WorkPane({
             />
           ))}
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          className="w-fit gap-1.5"
-          onClick={() => setSessionModal({ session: null })}
-        >
+        <Button size="sm" variant="outline" className="w-fit gap-1.5" onClick={callbacks.addSession}>
           <Plus className="size-3.5" /> Добавить занятие
         </Button>
       </CardContent>
-
-      <Program2SessionModal
-        open={!!sessionModal}
-        onOpenChange={(open) => !open && setSessionModal(null)}
-        rooms={rooms}
-        session={sessionModal?.session}
-        onSubmit={(details) => {
-          if (sessionModal?.session) {
-            callbacks.updateSession(sessionModal.session.id, details);
-          } else {
-            callbacks.addSession(details);
-          }
-        }}
-      />
 
       <Program2ItemPicker
         open={!!sectionPicker}
@@ -540,24 +455,6 @@ export function Program2WorkPane({
         onPick={(exerciseId) => {
           if (!exercisePicker) return;
           callbacks.addExercise(exercisePicker.sessionId, exercisePicker.sectionId, exerciseId);
-        }}
-      />
-
-      <Program2ExerciseModal
-        open={!!exerciseModal}
-        onOpenChange={(open) => !open && setExerciseModal(null)}
-        exercise={exerciseModal?.exercise}
-        entry={exerciseModal?.entry}
-        location={exerciseModal?.location ?? null}
-        onComplete={(ratings, autoGraded) => {
-          if (!exerciseModal) return;
-          callbacks.rateExercise(
-            exerciseModal.sessionId,
-            exerciseModal.sectionId,
-            exerciseModal.entry.id,
-            ratings,
-            autoGraded,
-          );
         }}
       />
 

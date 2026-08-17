@@ -121,6 +121,10 @@ export interface Program2Exercise {
   done: boolean;
   autoGraded: boolean;
   ratings: { accuracy: number | null; independence: number | null; pace: number | null };
+  date: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  roomId: string | null;
 }
 
 export interface Program2Section {

@@ -43,6 +43,7 @@ import { buildSessions, renumberSessions } from "@/lib/therapy";
 import {
   buildAutoProgram2,
   sortProgram2Sessions,
+  type Program2ExerciseScheduleDetails,
   type Program2ScheduleDetails,
 } from "@/lib/program2";
 
@@ -141,6 +142,13 @@ interface AppStateValue {
     exerciseInstanceId: string,
     ratings: Program2Exercise["ratings"],
     autoGraded: boolean,
+  ) => void;
+  updateProgram2ExerciseSchedule: (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    exerciseInstanceId: string,
+    details: Program2ExerciseScheduleDetails,
   ) => void;
   copyAutoSessionToWork: (patientId: string, autoSessionId: string) => void;
   copyAutoSectionToWork: (
@@ -822,6 +830,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       done: false,
       autoGraded: false,
       ratings: { accuracy: null, independence: null, pace: null },
+      date: null,
+      startTime: null,
+      endTime: null,
+      roomId: null,
     };
     setPatients((prev) =>
       prev.map((p) =>
@@ -939,6 +951,41 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
                                 ex.id === exerciseInstanceId
                                   ? { ...ex, ratings, autoGraded, done: true }
                                   : ex,
+                              ),
+                            }
+                          : sec,
+                      ),
+                    }
+                  : s,
+              ),
+            }
+          : p,
+      ),
+    );
+  };
+
+  const updateProgram2ExerciseSchedule = (
+    patientId: string,
+    sessionId: string,
+    sectionInstanceId: string,
+    exerciseInstanceId: string,
+    details: Program2ExerciseScheduleDetails,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              program2Work: p.program2Work.map((s) =>
+                s.id === sessionId
+                  ? {
+                      ...s,
+                      sections: s.sections.map((sec) =>
+                        sec.id === sectionInstanceId
+                          ? {
+                              ...sec,
+                              exercises: sec.exercises.map((ex) =>
+                                ex.id === exerciseInstanceId ? { ...ex, ...details } : ex,
                               ),
                             }
                           : sec,
@@ -1303,6 +1350,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       removeProgram2Exercise,
       reorderProgram2Exercises,
       setProgram2ExerciseRating,
+      updateProgram2ExerciseSchedule,
       copyAutoSessionToWork,
       copyAutoSectionToWork,
       copyAutoExerciseToWork,

@@ -40,6 +40,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar } from "@/components/ui/calendar";
 import { SessionRoadmap } from "@/components/app/SessionRoadmap";
 import { Program2Tab } from "@/components/app/program2/Program2Tab";
+import { Program2TrackTab } from "@/components/app/program2/Program2TrackTab";
 import { generateTimeOptions, rangesOverlap, timeToMinutes } from "@/lib/schedule";
 import {
   ArrowLeft,
@@ -370,6 +371,9 @@ export default function PatientDetailPage() {
           </TabsTrigger>
           <TabsTrigger value="program2" className="gap-1.5">
             Программа2
+          </TabsTrigger>
+          <TabsTrigger value="track" className="gap-1.5">
+            Трек пациента
           </TabsTrigger>
         </TabsList>
 
@@ -880,6 +884,10 @@ export default function PatientDetailPage() {
 
         <TabsContent value="program2" className="mt-4">
           <Program2Tab patientId={patient.id} />
+        </TabsContent>
+
+        <TabsContent value="track" className="mt-4">
+          <Program2TrackTab patientId={patient.id} editable title="Трек пациента" />
         </TabsContent>
       </Tabs>
 

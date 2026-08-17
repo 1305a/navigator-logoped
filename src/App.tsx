@@ -49,6 +49,7 @@ import PatientDashboardPage from "@/pages/patient/PatientDashboardPage";
 import HomeworkPage from "@/pages/patient/HomeworkPage";
 import DiaryPage from "@/pages/patient/DiaryPage";
 import ProgramPage from "@/pages/patient/ProgramPage";
+import MyTrackPage from "@/pages/patient/MyTrackPage";
 import PatientExerciseSessionRoute from "@/pages/patient/PatientExerciseSessionRoute";
 import PatientSessionDetailRoute from "@/pages/patient/PatientSessionDetailRoute";
 
@@ -148,6 +149,7 @@ export default function App() {
         <Route path="homework" element={<HomeworkPage />} />
         <Route path="diary" element={<DiaryPage />} />
         <Route path="program" element={<ProgramPage />} />
+        <Route path="my-track" element={<MyTrackPage />} />
         <Route path="program/session/:sessionId" element={<PatientSessionDetailRoute />} />
         <Route
           path="program/session/:sessionId/exercise/:exerciseId"

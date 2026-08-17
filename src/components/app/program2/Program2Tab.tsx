@@ -12,7 +12,6 @@ import { useAppState } from "@/context/AppStateContext";
 import { Button } from "@/components/ui/button";
 import { Program2AutoPane } from "@/components/app/program2/Program2AutoPane";
 import { Program2WorkPane } from "@/components/app/program2/Program2WorkPane";
-import { Program2CalendarPane } from "@/components/app/program2/Program2CalendarPane";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DragItemData {
@@ -25,14 +24,12 @@ interface DragItemData {
 export function Program2Tab({ patientId }: { patientId: string }) {
   const {
     getPatient,
-    rooms,
     exercises,
     workSections,
     buildProgram2Auto,
     fillProgram2WorkFromAuto,
     clearProgram2Work,
     addProgram2Session,
-    updateProgram2Session,
     removeProgram2Session,
     addProgram2Section,
     removeProgram2Section,
@@ -40,7 +37,6 @@ export function Program2Tab({ patientId }: { patientId: string }) {
     addProgram2Exercise,
     removeProgram2Exercise,
     reorderProgram2Exercises,
-    setProgram2ExerciseRating,
     copyAutoSessionToWork,
     copyAutoSectionToWork,
     copyAutoExerciseToWork,
@@ -48,7 +44,6 @@ export function Program2Tab({ patientId }: { patientId: string }) {
 
   const patient = getPatient(patientId);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
-  const [rightCollapsed, setRightCollapsed] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
@@ -149,7 +144,6 @@ export function Program2Tab({ patientId }: { patientId: string }) {
             <Program2AutoPane
               sessions={patient.program2Auto}
               built={patient.program2AutoBuilt}
-              rooms={rooms}
               exercises={exercises}
               workSections={workSections}
               onBuild={() => buildProgram2Auto(patientId)}
@@ -163,7 +157,7 @@ export function Program2Tab({ patientId }: { patientId: string }) {
             variant="ghost"
             size="icon-sm"
             onClick={() => setLeftCollapsed((v) => !v)}
-            title={leftCollapsed ? "Показать автоматическую программу" : "Свернуть автоматическую программу"}
+            title={leftCollapsed ? "Показать рекомендуемую программу" : "Свернуть рекомендуемую программу"}
           >
             {leftCollapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
           </Button>
@@ -176,22 +170,19 @@ export function Program2Tab({ patientId }: { patientId: string }) {
             className="w-fit gap-1.5 lg:hidden"
             onClick={() => setLeftCollapsed(false)}
           >
-            <ChevronRight className="size-4" /> Автоматическая программа
+            <ChevronRight className="size-4" /> Рекомендуемая программа
           </Button>
         )}
 
         <div className="flex flex-col gap-2 lg:flex-1">
           <Program2WorkPane
             sessions={patient.program2Work}
-            rooms={rooms}
             exercises={exercises}
             workSections={workSections}
             callbacks={{
               fillFromAuto: () => fillProgram2WorkFromAuto(patientId),
               clearWork: () => clearProgram2Work(patientId),
-              addSession: (details) => addProgram2Session(patientId, details),
-              updateSession: (sessionId, details) =>
-                updateProgram2Session(patientId, sessionId, details),
+              addSession: () => addProgram2Session(patientId, { location: "home", date: null }),
               removeSession: (sessionId) => removeProgram2Session(patientId, sessionId),
               addSection: (sessionId, workSectionId) =>
                 addProgram2Section(patientId, sessionId, workSectionId),
@@ -205,51 +196,9 @@ export function Program2Tab({ patientId }: { patientId: string }) {
                 removeProgram2Exercise(patientId, sessionId, sectionInstanceId, exerciseInstanceId),
               reorderExercises: (sessionId, sectionInstanceId, orderedIds) =>
                 reorderProgram2Exercises(patientId, sessionId, sectionInstanceId, orderedIds),
-              rateExercise: (sessionId, sectionInstanceId, exerciseInstanceId, ratings, autoGraded) =>
-                setProgram2ExerciseRating(
-                  patientId,
-                  sessionId,
-                  sectionInstanceId,
-                  exerciseInstanceId,
-                  ratings,
-                  autoGraded,
-                ),
             }}
           />
         </div>
-
-        {rightCollapsed && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-fit gap-1.5 lg:hidden"
-            onClick={() => setRightCollapsed(false)}
-          >
-            <ChevronLeft className="size-4" /> Календарь
-          </Button>
-        )}
-        <div className="hidden lg:flex lg:flex-col lg:items-center">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setRightCollapsed((v) => !v)}
-            title={rightCollapsed ? "Показать календарь" : "Свернуть календарь"}
-          >
-            {rightCollapsed ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
-          </Button>
-        </div>
-        {!rightCollapsed && (
-          <div className="lg:w-80">
-            <Program2CalendarPane
-              sessions={patient.program2Work}
-              rooms={rooms}
-              exercises={exercises}
-              workSections={workSections}
-            />
-          </div>
-        )}
       </div>
     </DndContext>
   );

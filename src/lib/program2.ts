@@ -4,6 +4,14 @@ export type Program2ScheduleDetails =
   | { location: "home"; date: string | null }
   | { location: "room"; roomId: string; date: string; startTime: string; endTime: string };
 
+export interface Program2ExerciseScheduleDetails {
+  done: boolean;
+  date: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  roomId: string | null;
+}
+
 function parseRuDate(date: string): number {
   const [d, m, y] = date.split(".").map(Number);
   return new Date(y, m - 1, d).getTime();
@@ -20,10 +28,15 @@ export function sortProgram2Sessions(sessions: Program2Session[]): Program2Sessi
   });
 }
 
-function formatDate(date: Date): string {
+export function formatRuDate(date: Date): string {
   const d = date.getDate().toString().padStart(2, "0");
   const m = (date.getMonth() + 1).toString().padStart(2, "0");
   return `${d}.${m}.${date.getFullYear()}`;
+}
+
+export function parseRuDateToDate(date: string): Date {
+  const [d, m, y] = date.split(".").map(Number);
+  return new Date(y, m - 1, d);
 }
 
 const SLOTS = [
@@ -64,6 +77,10 @@ export function buildAutoProgram2(
             done: false,
             autoGraded: false,
             ratings: { accuracy: null, independence: null, pace: null },
+            date: null,
+            startTime: null,
+            endTime: null,
+            roomId: null,
           })),
         };
       },
@@ -78,7 +95,7 @@ export function buildAutoProgram2(
       id: `p2s-${patientId}-${now}-${sessionIndex}`,
       location,
       roomId: location === "room" ? roomId : null,
-      date: formatDate(date),
+      date: formatRuDate(date),
       startTime: slot.startTime,
       endTime: slot.endTime,
       sections,

@@ -1,4 +1,4 @@
-import { LayoutDashboard, ListChecks, BookHeart, ClipboardList } from "lucide-react";
+import { LayoutDashboard, ListChecks, BookHeart, ClipboardList, Route } from "lucide-react";
 import { AppShell, type AppMenuItem } from "./AppShell";
 
 const menuItems: AppMenuItem[] = [
@@ -6,6 +6,7 @@ const menuItems: AppMenuItem[] = [
   { to: "/patient/homework", label: "Домашнее задание", icon: ListChecks },
   { to: "/patient/diary", label: "Мой дневник", icon: BookHeart },
   { to: "/patient/program", label: "Моя программа", icon: ClipboardList },
+  { to: "/patient/my-track", label: "Мой трек", icon: Route },
 ];
 
 export default function PatientLayout() {
