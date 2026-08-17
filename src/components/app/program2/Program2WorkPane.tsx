@@ -3,7 +3,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Exercise, Program2Exercise, Program2Section, Program2Session, Room, WorkSection } from "@/data/types";
-import type { SessionScheduleDetails } from "@/context/AppStateContext";
+import type { Program2ScheduleDetails } from "@/lib/program2";
 import {
   Card,
   CardAction,
@@ -40,8 +40,8 @@ import {
 interface WorkPaneCallbacks {
   fillFromAuto: () => void;
   clearWork: () => void;
-  addSession: (details: SessionScheduleDetails) => void;
-  updateSession: (sessionId: string, details: SessionScheduleDetails) => void;
+  addSession: (details: Program2ScheduleDetails) => void;
+  updateSession: (sessionId: string, details: Program2ScheduleDetails) => void;
   removeSession: (sessionId: string) => void;
   addSection: (sessionId: string, workSectionId: string) => void;
   removeSection: (sessionId: string, sectionInstanceId: string) => void;

@@ -1,5 +1,9 @@
 import type { Exercise, Program2Session, Room, WorkSection } from "@/data/types";
 
+export type Program2ScheduleDetails =
+  | { location: "home"; date: string | null }
+  | { location: "room"; roomId: string; date: string; startTime: string; endTime: string };
+
 function parseRuDate(date: string): number {
   const [d, m, y] = date.split(".").map(Number);
   return new Date(y, m - 1, d).getTime();

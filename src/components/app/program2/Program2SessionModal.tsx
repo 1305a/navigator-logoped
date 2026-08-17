@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Program2Session, Room } from "@/data/types";
-import type { SessionScheduleDetails } from "@/context/AppStateContext";
+import type { Program2ScheduleDetails } from "@/lib/program2";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,7 @@ export function Program2SessionModal({
   onOpenChange: (open: boolean) => void;
   rooms: Room[];
   session?: Program2Session | null;
-  onSubmit: (details: SessionScheduleDetails) => void;
+  onSubmit: (details: Program2ScheduleDetails) => void;
 }) {
   const [location, setLocation] = useState<"home" | "room">("home");
   const [roomId, setRoomId] = useState("");
@@ -73,7 +73,7 @@ export function Program2SessionModal({
   function handleSubmit() {
     if (!valid) return;
     if (location === "home") {
-      onSubmit({ location: "home" });
+      onSubmit({ location: "home", date: date ? formatRuDate(date) : null });
     } else {
       onSubmit({
         location: "room",
@@ -108,6 +108,19 @@ export function Program2SessionModal({
               </label>
             </RadioGroup>
           </div>
+
+          {location === "home" && (
+            <div className="flex flex-col gap-1.5">
+              <Label>Дата (необязательно)</Label>
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                defaultMonth={date}
+                className="self-center rounded-lg border"
+              />
+            </div>
+          )}
 
           {location === "room" && (
             <>

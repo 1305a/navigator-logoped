@@ -40,7 +40,11 @@ import { initialExerciseBank } from "@/data/exercises";
 import { initialTrainerCatalog } from "@/data/trainers";
 import { initialOfflineExercises } from "@/data/offlineExercises";
 import { buildSessions, renumberSessions } from "@/lib/therapy";
-import { buildAutoProgram2, sortProgram2Sessions } from "@/lib/program2";
+import {
+  buildAutoProgram2,
+  sortProgram2Sessions,
+  type Program2ScheduleDetails,
+} from "@/lib/program2";
 
 export type SessionScheduleDetails =
   | { location: "home" }
@@ -98,11 +102,11 @@ interface AppStateValue {
   buildProgram2Auto: (patientId: string) => void;
   fillProgram2WorkFromAuto: (patientId: string) => void;
   clearProgram2Work: (patientId: string) => void;
-  addProgram2Session: (patientId: string, details: SessionScheduleDetails) => void;
+  addProgram2Session: (patientId: string, details: Program2ScheduleDetails) => void;
   updateProgram2Session: (
     patientId: string,
     sessionId: string,
-    details: SessionScheduleDetails,
+    details: Program2ScheduleDetails,
   ) => void;
   removeProgram2Session: (patientId: string, sessionId: string) => void;
   addProgram2Section: (patientId: string, sessionId: string, workSectionId: string) => void;
@@ -680,12 +684,12 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const addProgram2Session = (patientId: string, details: SessionScheduleDetails) => {
+  const addProgram2Session = (patientId: string, details: Program2ScheduleDetails) => {
     const newSession: Program2Session = {
       id: `p2w-${Date.now()}`,
       location: details.location,
       roomId: details.location === "room" ? details.roomId : null,
-      date: details.location === "room" ? details.date : null,
+      date: details.date,
       startTime: details.location === "room" ? details.startTime : null,
       endTime: details.location === "room" ? details.endTime : null,
       sections: [],
@@ -702,7 +706,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const updateProgram2Session = (
     patientId: string,
     sessionId: string,
-    details: SessionScheduleDetails,
+    details: Program2ScheduleDetails,
   ) => {
     setPatients((prev) =>
       prev.map((p) =>
@@ -716,7 +720,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
                         ...s,
                         location: details.location,
                         roomId: details.location === "room" ? details.roomId : null,
-                        date: details.location === "room" ? details.date : null,
+                        date: details.date,
                         startTime: details.location === "room" ? details.startTime : null,
                         endTime: details.location === "room" ? details.endTime : null,
                       }

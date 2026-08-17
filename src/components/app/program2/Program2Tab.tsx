@@ -12,6 +12,7 @@ import { useAppState } from "@/context/AppStateContext";
 import { Button } from "@/components/ui/button";
 import { Program2AutoPane } from "@/components/app/program2/Program2AutoPane";
 import { Program2WorkPane } from "@/components/app/program2/Program2WorkPane";
+import { Program2CalendarPane } from "@/components/app/program2/Program2CalendarPane";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DragItemData {
@@ -47,6 +48,7 @@ export function Program2Tab({ patientId }: { patientId: string }) {
 
   const patient = getPatient(patientId);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
+  const [rightCollapsed, setRightCollapsed] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
@@ -215,6 +217,39 @@ export function Program2Tab({ patientId }: { patientId: string }) {
             }}
           />
         </div>
+
+        {rightCollapsed && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-fit gap-1.5 lg:hidden"
+            onClick={() => setRightCollapsed(false)}
+          >
+            <ChevronLeft className="size-4" /> Календарь
+          </Button>
+        )}
+        <div className="hidden lg:flex lg:flex-col lg:items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setRightCollapsed((v) => !v)}
+            title={rightCollapsed ? "Показать календарь" : "Свернуть календарь"}
+          >
+            {rightCollapsed ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
+          </Button>
+        </div>
+        {!rightCollapsed && (
+          <div className="lg:w-80">
+            <Program2CalendarPane
+              sessions={patient.program2Work}
+              rooms={rooms}
+              exercises={exercises}
+              workSections={workSections}
+            />
+          </div>
+        )}
       </div>
     </DndContext>
   );
