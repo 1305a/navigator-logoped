@@ -52,6 +52,7 @@ import {
   RefreshCw,
   Sparkles,
   User,
+  Wrench,
   XCircle,
 } from "lucide-react";
 
@@ -140,7 +141,22 @@ export default function PatientDetailPage() {
   } = useAppState();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [tab, setTab] = useState(searchParams.get("tab") ?? "info");
+  const approachSubTabs = [
+    "preliminary",
+    "card",
+    "diagnosis",
+    "riskFactors",
+    "program",
+    "program2",
+    "track",
+  ];
+  const initialTabParam = searchParams.get("tab") ?? "info";
+  const [tab, setTab] = useState(
+    approachSubTabs.includes(initialTabParam) ? "approach1" : initialTabParam,
+  );
+  const [approachTab, setApproachTab] = useState(
+    approachSubTabs.includes(initialTabParam) ? initialTabParam : "preliminary",
+  );
   const patient = patientId ? getPatient(patientId) : undefined;
   const [form, setForm] = useState<SpeechCard>(patient?.speechCard ?? emptyCard);
   const [manualDiagnosis, setManualDiagnosis] = useState("");
@@ -188,14 +204,16 @@ export default function PatientDetailPage() {
     }`;
     suggestDiagnosis(patient.id, diagnosisText);
     toast.success("Диагноз предложен системой");
-    setTab("diagnosis");
+    setTab("approach1");
+    setApproachTab("diagnosis");
   }
 
   function handleApproveDiagnosis() {
     if (!patient) return;
     approveDiagnosis(patient.id);
     toast.success("Диагноз одобрен");
-    setTab("riskFactors");
+    setTab("approach1");
+    setApproachTab("riskFactors");
   }
 
   function handleCreateProgram() {
@@ -321,7 +339,8 @@ export default function PatientDetailPage() {
     suggestDiagnosis(patient.id, manualDiagnosis);
     approveDiagnosis(patient.id);
     toast.success("Диагноз выбран вручную и одобрен");
-    setTab("riskFactors");
+    setTab("approach1");
+    setApproachTab("riskFactors");
   }
 
   const selectedCardType = speechCardTypes.find((t) => t.id === selectedCardTypeId);
@@ -354,26 +373,11 @@ export default function PatientDetailPage() {
           <TabsTrigger value="info" className="gap-1.5">
             <User className="size-3.5" /> Информация о пациенте
           </TabsTrigger>
-          <TabsTrigger value="preliminary" className="gap-1.5">
-            <ListChecks className="size-3.5" /> Предварительный набор вопросов
+          <TabsTrigger value="approach1" className="gap-1.5">
+            Подход 1
           </TabsTrigger>
-          <TabsTrigger value="card" disabled={cardLocked} className="gap-1.5">
-            {cardLocked && <Lock className="size-3.5" />} Речевая карта
-          </TabsTrigger>
-          <TabsTrigger value="diagnosis" disabled={diagnosisLocked} className="gap-1.5">
-            {diagnosisLocked && <Lock className="size-3.5" />} Диагноз
-          </TabsTrigger>
-          <TabsTrigger value="riskFactors" disabled={riskFactorsLocked} className="gap-1.5">
-            {riskFactorsLocked && <Lock className="size-3.5" />} Факторы риска
-          </TabsTrigger>
-          <TabsTrigger value="program" disabled={programLocked} className="gap-1.5">
-            {programLocked && <Lock className="size-3.5" />} Программа
-          </TabsTrigger>
-          <TabsTrigger value="program2" className="gap-1.5">
-            Программа2
-          </TabsTrigger>
-          <TabsTrigger value="track" className="gap-1.5">
-            Трек пациента
+          <TabsTrigger value="approach2" className="gap-1.5">
+            Подход 2
           </TabsTrigger>
         </TabsList>
 
@@ -403,6 +407,32 @@ export default function PatientDetailPage() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="approach1" className="mt-4">
+          <Tabs value={approachTab} onValueChange={setApproachTab}>
+            <TabsList>
+              <TabsTrigger value="preliminary" className="gap-1.5">
+                <ListChecks className="size-3.5" /> Предварительный набор вопросов
+              </TabsTrigger>
+              <TabsTrigger value="card" disabled={cardLocked} className="gap-1.5">
+                {cardLocked && <Lock className="size-3.5" />} Речевая карта
+              </TabsTrigger>
+              <TabsTrigger value="diagnosis" disabled={diagnosisLocked} className="gap-1.5">
+                {diagnosisLocked && <Lock className="size-3.5" />} Диагноз
+              </TabsTrigger>
+              <TabsTrigger value="riskFactors" disabled={riskFactorsLocked} className="gap-1.5">
+                {riskFactorsLocked && <Lock className="size-3.5" />} Факторы риска
+              </TabsTrigger>
+              <TabsTrigger value="program" disabled={programLocked} className="gap-1.5">
+                {programLocked && <Lock className="size-3.5" />} Программа
+              </TabsTrigger>
+              <TabsTrigger value="program2" className="gap-1.5">
+                Программа2
+              </TabsTrigger>
+              <TabsTrigger value="track" className="gap-1.5">
+                Трек пациента
+              </TabsTrigger>
+            </TabsList>
 
         <TabsContent value="preliminary" className="mt-4">
           <Card>
@@ -888,6 +918,18 @@ export default function PatientDetailPage() {
 
         <TabsContent value="track" className="mt-4">
           <Program2TrackTab patientId={patient.id} editable title="Трек пациента" />
+        </TabsContent>
+          </Tabs>
+        </TabsContent>
+
+        <TabsContent value="approach2" className="mt-4">
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed bg-muted/30 p-12 text-center">
+            <Wrench className="size-8 text-muted-foreground" />
+            <p className="text-sm font-medium text-foreground">Раздел находится в разработке</p>
+            <p className="max-w-sm text-xs text-muted-foreground">
+              «Подход 2» будет добавлен в следующей версии сервиса.
+            </p>
+          </div>
         </TabsContent>
       </Tabs>
 
