@@ -41,6 +41,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { SessionRoadmap } from "@/components/app/SessionRoadmap";
 import { Program2Tab } from "@/components/app/program2/Program2Tab";
 import { Program2TrackTab } from "@/components/app/program2/Program2TrackTab";
+import { IntakeTab } from "@/components/app/intake/IntakeTab";
 import { generateTimeOptions, rangesOverlap, timeToMinutes } from "@/lib/schedule";
 import {
   ArrowLeft,
@@ -52,7 +53,6 @@ import {
   RefreshCw,
   Sparkles,
   User,
-  Wrench,
   XCircle,
 } from "lucide-react";
 
@@ -923,13 +923,7 @@ export default function PatientDetailPage() {
         </TabsContent>
 
         <TabsContent value="approach2" className="mt-4">
-          <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed bg-muted/30 p-12 text-center">
-            <Wrench className="size-8 text-muted-foreground" />
-            <p className="text-sm font-medium text-foreground">Раздел находится в разработке</p>
-            <p className="max-w-sm text-xs text-muted-foreground">
-              «Подход 2» будет добавлен в следующей версии сервиса.
-            </p>
-          </div>
+          <IntakeTab patientId={patient.id} />
         </TabsContent>
       </Tabs>
 

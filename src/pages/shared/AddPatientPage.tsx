@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppState } from "@/context/AppStateContext";
+import { emptyIntakeState } from "@/lib/intake";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -68,6 +69,7 @@ export default function AddPatientPage({ backTo }: { backTo: string }) {
       program2AutoBuilt: false,
       program2Auto: [],
       program2Work: [],
+      intake: emptyIntakeState(),
     });
     toast.success("Пациент добавлен");
     navigate(backTo);

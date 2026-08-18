@@ -143,6 +143,35 @@ export interface Program2Session {
   sections: Program2Section[];
 }
 
+export interface IntakeGoal {
+  id: string;
+  source: string;
+  icfLevel: string;
+  icfCode: string;
+  longTerm: string;
+  action: string;
+  criterion: string;
+  deadline: string;
+  gasOpen: boolean;
+  gas: { m2: string; m1: string; z: string; p1: string; p2: string };
+}
+
+export type IntakeTab = "complaint" | "questions" | "card" | "additional" | "diagnosis" | "goals";
+
+export interface IntakeState {
+  tab: IntakeTab;
+  complaintId: string | null;
+  answers: Record<string, string | string[]>;
+  selectedCard: string | null;
+  additionalVisited: boolean;
+  riskFactors: Record<string, string>;
+  mdt: Record<string, string>;
+  icf: Record<string, number>;
+  goals: IntakeGoal[];
+  diagApproved: boolean;
+  goalsSaved: boolean;
+}
+
 export interface Patient {
   id: string;
   fullName: string;
@@ -162,6 +191,7 @@ export interface Patient {
   program2AutoBuilt: boolean;
   program2Auto: Program2Session[];
   program2Work: Program2Session[];
+  intake: IntakeState;
 }
 
 export interface Appointment {

@@ -1,5 +1,6 @@
 import type { Patient, TherapySession } from "./types";
 import { buildSessions } from "@/lib/therapy";
+import { emptyIntakeState } from "@/lib/intake";
 
 function withProgress(
   patientId: string,
@@ -61,6 +62,7 @@ export const initialPatients: Patient[] = [
     program2AutoBuilt: false,
     program2Auto: [],
     program2Work: [],
+    intake: emptyIntakeState(),
   },
   {
     id: "p2",
@@ -103,6 +105,7 @@ export const initialPatients: Patient[] = [
     program2AutoBuilt: false,
     program2Auto: [],
     program2Work: [],
+    intake: emptyIntakeState(),
   },
   {
     id: "p3",
@@ -145,6 +148,7 @@ export const initialPatients: Patient[] = [
     program2AutoBuilt: false,
     program2Auto: [],
     program2Work: [],
+    intake: emptyIntakeState(),
   },
   {
     id: "p4",
@@ -187,6 +191,7 @@ export const initialPatients: Patient[] = [
     program2AutoBuilt: false,
     program2Auto: [],
     program2Work: [],
+    intake: emptyIntakeState(),
   },
   {
     id: "p5",
@@ -229,6 +234,7 @@ export const initialPatients: Patient[] = [
     program2AutoBuilt: false,
     program2Auto: [],
     program2Work: [],
+    intake: emptyIntakeState(),
   },
   {
     id: "p6",
@@ -271,6 +277,7 @@ export const initialPatients: Patient[] = [
     program2AutoBuilt: false,
     program2Auto: [],
     program2Work: [],
+    intake: emptyIntakeState(),
   },
   {
     id: "p7",
@@ -301,6 +308,7 @@ export const initialPatients: Patient[] = [
     program2AutoBuilt: false,
     program2Auto: [],
     program2Work: [],
+    intake: emptyIntakeState(),
   },
   {
     id: "p8",
@@ -343,5 +351,6 @@ export const initialPatients: Patient[] = [
     program2AutoBuilt: false,
     program2Auto: [],
     program2Work: [],
+    intake: emptyIntakeState(),
   },
 ];

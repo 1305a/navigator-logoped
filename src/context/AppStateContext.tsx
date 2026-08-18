@@ -6,6 +6,8 @@ import type {
   DiaryEntry,
   EmployeeActivityType,
   Exercise,
+  IntakeGoal,
+  IntakeTab,
   OfflineExercise,
   Patient,
   PatientInfo,
@@ -46,6 +48,7 @@ import {
   type Program2ExerciseScheduleDetails,
   type Program2ScheduleDetails,
 } from "@/lib/program2";
+import { emptyIntakeState } from "@/lib/intake";
 
 export type SessionScheduleDetails =
   | { location: "home" }
@@ -165,6 +168,45 @@ interface AppStateValue {
     targetSessionId: string,
     targetSectionInstanceId: string,
   ) => void;
+
+  setIntakeTab: (patientId: string, tab: IntakeTab) => void;
+  selectIntakeComplaint: (patientId: string, complaintId: string) => void;
+  setIntakeAnswer: (
+    patientId: string,
+    questionId: string,
+    value: string,
+    multi: boolean,
+  ) => void;
+  agreeIntakeRecommendation: (patientId: string, card: string) => void;
+  manualSelectIntakeCard: (patientId: string, card: string) => void;
+  changeIntakeCardSelection: (patientId: string) => void;
+  updateIntakeRiskField: (patientId: string, key: string, value: string) => void;
+  updateIntakeMdtField: (patientId: string, key: string, value: string) => void;
+  setIntakeIcf: (patientId: string, code: string, value: number) => void;
+  approveIntakeDiagnosis: (patientId: string) => void;
+  addIntakeGoal: (patientId: string) => void;
+  removeIntakeGoal: (patientId: string, goalId: string) => void;
+  updateIntakeGoal: (
+    patientId: string,
+    goalId: string,
+    field: "longTerm" | "action" | "criterion" | "deadline" | "icfCode",
+    value: string,
+  ) => void;
+  setIntakeGoalOption: (
+    patientId: string,
+    goalId: string,
+    field: "source" | "icfLevel",
+    value: string,
+  ) => void;
+  toggleIntakeGas: (patientId: string, goalId: string) => void;
+  updateIntakeGas: (
+    patientId: string,
+    goalId: string,
+    key: keyof IntakeGoal["gas"],
+    value: string,
+  ) => void;
+  pullIntakeGoalFromRequest: (patientId: string, goalId: string) => void;
+  saveIntakeGoals: (patientId: string) => void;
 
   addPatient: (patient: Patient) => void;
   updatePatientInfo: (patientId: string, info: PatientInfo) => void;
@@ -1089,6 +1131,274 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const setIntakeTab = (patientId: string, tab: IntakeTab) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              intake: {
+                ...p.intake,
+                tab,
+                additionalVisited: p.intake.additionalVisited || tab === "additional",
+              },
+            }
+          : p,
+      ),
+    );
+  };
+
+  const selectIntakeComplaint = (patientId: string, complaintId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              intake: {
+                ...emptyIntakeState(),
+                tab: "questions",
+                complaintId,
+              },
+            }
+          : p,
+      ),
+    );
+  };
+
+  const setIntakeAnswer = (
+    patientId: string,
+    questionId: string,
+    value: string,
+    multi: boolean,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) => {
+        if (p.id !== patientId) return p;
+        const current = p.intake.answers[questionId];
+        let nextValue: string | string[];
+        if (multi) {
+          const arr = Array.isArray(current) ? current : [];
+          nextValue = arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
+        } else {
+          nextValue = value;
+        }
+        return {
+          ...p,
+          intake: { ...p.intake, answers: { ...p.intake.answers, [questionId]: nextValue } },
+        };
+      }),
+    );
+  };
+
+  const agreeIntakeRecommendation = (patientId: string, card: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, intake: { ...p.intake, selectedCard: card, diagApproved: false } }
+          : p,
+      ),
+    );
+  };
+
+  const manualSelectIntakeCard = (patientId: string, card: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, intake: { ...p.intake, selectedCard: card, diagApproved: false } }
+          : p,
+      ),
+    );
+  };
+
+  const changeIntakeCardSelection = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, intake: { ...p.intake, selectedCard: null, diagApproved: false } }
+          : p,
+      ),
+    );
+  };
+
+  const updateIntakeRiskField = (patientId: string, key: string, value: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, intake: { ...p.intake, riskFactors: { ...p.intake.riskFactors, [key]: value } } }
+          : p,
+      ),
+    );
+  };
+
+  const updateIntakeMdtField = (patientId: string, key: string, value: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, intake: { ...p.intake, mdt: { ...p.intake.mdt, [key]: value } } }
+          : p,
+      ),
+    );
+  };
+
+  const setIntakeIcf = (patientId: string, code: string, value: number) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, intake: { ...p.intake, icf: { ...p.intake.icf, [code]: value } } }
+          : p,
+      ),
+    );
+  };
+
+  const approveIntakeDiagnosis = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId ? { ...p, intake: { ...p.intake, diagApproved: true } } : p,
+      ),
+    );
+  };
+
+  const addIntakeGoal = (patientId: string) => {
+    const newGoal: IntakeGoal = {
+      id: `ig-${Date.now()}`,
+      source: "Система (из профиля МКФ)",
+      icfLevel: "Активность",
+      icfCode: "",
+      longTerm: "",
+      action: "",
+      criterion: "",
+      deadline: "",
+      gasOpen: false,
+      gas: { m2: "", m1: "", z: "", p1: "", p2: "" },
+    };
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId && p.intake.goals.length < 4
+          ? { ...p, intake: { ...p.intake, goals: [...p.intake.goals, newGoal] } }
+          : p,
+      ),
+    );
+  };
+
+  const removeIntakeGoal = (patientId: string, goalId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? { ...p, intake: { ...p.intake, goals: p.intake.goals.filter((g) => g.id !== goalId) } }
+          : p,
+      ),
+    );
+  };
+
+  const updateIntakeGoal = (
+    patientId: string,
+    goalId: string,
+    field: "longTerm" | "action" | "criterion" | "deadline" | "icfCode",
+    value: string,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              intake: {
+                ...p.intake,
+                goals: p.intake.goals.map((g) => (g.id === goalId ? { ...g, [field]: value } : g)),
+              },
+            }
+          : p,
+      ),
+    );
+  };
+
+  const setIntakeGoalOption = (
+    patientId: string,
+    goalId: string,
+    field: "source" | "icfLevel",
+    value: string,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              intake: {
+                ...p.intake,
+                goals: p.intake.goals.map((g) => (g.id === goalId ? { ...g, [field]: value } : g)),
+              },
+            }
+          : p,
+      ),
+    );
+  };
+
+  const toggleIntakeGas = (patientId: string, goalId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              intake: {
+                ...p.intake,
+                goals: p.intake.goals.map((g) =>
+                  g.id === goalId ? { ...g, gasOpen: !g.gasOpen } : g,
+                ),
+              },
+            }
+          : p,
+      ),
+    );
+  };
+
+  const updateIntakeGas = (
+    patientId: string,
+    goalId: string,
+    key: keyof IntakeGoal["gas"],
+    value: string,
+  ) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              intake: {
+                ...p.intake,
+                goals: p.intake.goals.map((g) =>
+                  g.id === goalId ? { ...g, gas: { ...g.gas, [key]: value } } : g,
+                ),
+              },
+            }
+          : p,
+      ),
+    );
+  };
+
+  const pullIntakeGoalFromRequest = (patientId: string, goalId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId
+          ? {
+              ...p,
+              intake: {
+                ...p.intake,
+                goals: p.intake.goals.map((g) =>
+                  g.id === goalId ? { ...g, longTerm: p.intake.riskFactors.psyRequest ?? "" } : g,
+                ),
+              },
+            }
+          : p,
+      ),
+    );
+  };
+
+  const saveIntakeGoals = (patientId: string) => {
+    setPatients((prev) =>
+      prev.map((p) =>
+        p.id === patientId ? { ...p, intake: { ...p.intake, goalsSaved: true } } : p,
+      ),
+    );
+  };
+
   const addPatient = (patient: Patient) => setPatients((prev) => [...prev, patient]);
 
   const updatePatientInfo = (patientId: string, info: PatientInfo) => {
@@ -1354,6 +1664,24 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       copyAutoSessionToWork,
       copyAutoSectionToWork,
       copyAutoExerciseToWork,
+      setIntakeTab,
+      selectIntakeComplaint,
+      setIntakeAnswer,
+      agreeIntakeRecommendation,
+      manualSelectIntakeCard,
+      changeIntakeCardSelection,
+      updateIntakeRiskField,
+      updateIntakeMdtField,
+      setIntakeIcf,
+      approveIntakeDiagnosis,
+      addIntakeGoal,
+      removeIntakeGoal,
+      updateIntakeGoal,
+      setIntakeGoalOption,
+      toggleIntakeGas,
+      updateIntakeGas,
+      pullIntakeGoalFromRequest,
+      saveIntakeGoals,
       addPatient,
       updatePatientInfo,
       appointments,
